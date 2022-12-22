@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#PBS -l nodes=2:ppn=36			# ppn should be multiple of 9, max. 36 ppn on victini
+
+#PBS -l walltime=26:00:00
+
+#PBS -m abe				  ## send mail
+
+
+module load IPython/7.9.0-intel-2019b-Python-3.7.4
+
+cd $HOME_DIR
+cd ./COMPASS/Version2022_2023
+
+python PowerAnalysisHPCv2.py GD ${PBS_ARRAYID}
+# run with command wsub -t 1-500 -batch PowerAnalysisGDv2.pbs
