@@ -216,9 +216,9 @@ Power computations consist of the following five steps:
 
     Example output (EC criterion): 
     
-    <img width="800" alt="image" src="https://github.com/PieterVerbeke/COMPASS/blob/Version-0.2/Figures_ReadMe/Output_terminal.png">  
+    <img width="800" alt="image" src="https://github.com/CogComNeuroSci/COMPASS/blob/main/Figures_ReadMe/Output_terminal.png">  
     
-    <img width="500" alt="image" src="https://github.com/PieterVerbeke/COMPASS/blob/Version-0.2/Figures_ReadMe/Output_plot.png">
+    <img width="500" alt="image" src="https://github.com/CogComNeuroSci/COMPASS/blob/main/Figures_ReadMe//Output_plot.png">
     
 # Contact
 - Corresponding author: Pieter Verbeke
