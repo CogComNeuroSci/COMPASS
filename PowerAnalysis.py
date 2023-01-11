@@ -159,7 +159,7 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
 
     #Compute power if estimates would be perfect.
     power_true = np.mean((allreps_output['True_pValue'] <= typeIerror)*1)
-    print(str("\nProbability to obtain a significant correlation under conventional implementation: {}%".format(np.round(power_true*100,2))))
+    print(str("\nProbability to obtain a significant correlation under conventional power implementation: {}%".format(np.round(power_true*100,2))))
 
     #Compute power for correlation with estimated parameter values.
     power_estimate = np.mean((allreps_output['estimated_pValue'] <= typeIerror)*1)
@@ -230,7 +230,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         if HPC == False:
             power_true = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None,
                                     alternative = 'larger')
-            print("\nProbability to obtain a significant group difference under conventional implementation: {}%".format(np.round(power_true*100,2)))
+            print("\nProbability to obtain a significant group difference under conventional power implementation: {}%".format(np.round(power_true*100,2)))
 
         #divide process over multiple cores
         if mean_LRdistributionG1 > mean_LRdistributionG2:
