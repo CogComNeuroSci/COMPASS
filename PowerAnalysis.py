@@ -63,7 +63,7 @@ def power_estimation_Incorrelation(npp = 30, ntrials = 480, nreversals = 12, cut
 
     Description
     -----------
-    Function that actually calculates the power to obtain adequate parameter estimates.
+    Function that actually calculates the probability to obtain adequate parameter estimates.
     Parameter estimates are considered to be adequate if their correlation with the true parameters is minimum the cut_off.
     Power is calculated using a Monte Carlo simulation-based approach.
     """
@@ -85,7 +85,7 @@ def power_estimation_Incorrelation(npp = 30, ntrials = 480, nreversals = 12, cut
 
 
     power_estimate = np.mean((allreps_output['correlations'] >= cut_off)*1)
-    print(str("\nPower to obtain a correlation(true_param, param_estim) >= {}".format(cut_off)
+    print(str("\nProbability to obtain a correlation(true_param, param_estim) >= {}".format(cut_off)
           + " with {} trials and {} participants: {}%".format(ntrials, npp, power_estimate*100)))
 
     return allreps_output, power_estimate
@@ -131,7 +131,7 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
 
     Description
     -----------
-    Function that actually calculates the power to obtain significant correlations with external measures.
+    Function that actually calculates the probability to obtain significant correlations with external measures.
     Parameter estimates are considered to be adequate if correctly reveal a significant correlation when a significant correlation.
     Power is calculated using a Monte Carlo simulation-based approach.
     """
@@ -159,11 +159,11 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
 
     #Compute power if estimates would be perfect.
     power_true = np.mean((allreps_output['True_pValue'] <= typeIerror)*1)
-    print(str("\nPower to obtain a significant correlation under conventional implementation: {}%".format(np.round(power_true*100,2))))
+    print(str("\nProbability to obtain a significant correlation under conventional implementation: {}%".format(np.round(power_true*100,2))))
 
     #Compute power for correlation with estimated parameter values.
     power_estimate = np.mean((allreps_output['estimated_pValue'] <= typeIerror)*1)
-    print(str("\nPower to obtain a significant correlation between model parameter and an external measure that is {} correlated".format(True_correlation)
+    print(str("\nProbability to obtain a significant correlation between model parameter and an external measure that is {} correlated".format(True_correlation)
           + " with {} trials and {} participants: {}%".format(ntrials, npp, np.round(power_estimate*100,2))))
 
     return allreps_output, power_estimate
@@ -217,7 +217,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
 
     Description
     -----------
-    Function that actually calculates the power to obtain adequate parameter estimates.
+    Function that actually calculates the probability to obtain adequate parameter estimates.
     Parameter estimates are considered to be adequate if they correctly reveal the group difference when a true group difference of size 'cohens_d' exists.
     Power is calculated using a Monte Carlo simulation-based approach.
     """
@@ -230,7 +230,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         if HPC == False:
             power_true = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None,
                                     alternative = 'larger')
-            print("\nPower to obtain a significant group difference under conventional implementation: {}%".format(np.round(power_true*100,2)))
+            print("\nProbability to obtain a significant group difference under conventional implementation: {}%".format(np.round(power_true*100,2)))
 
         #divide process over multiple cores
         if mean_LRdistributionG1 > mean_LRdistributionG2:
@@ -252,7 +252,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
         # check for which % of repetitions the group difference was significant
         # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
         power_estimate = np.mean((allreps_output['PValue'] <= typeIerror))
-        print(str("\nPower to detect a significant group difference when the estimated effect size d = {}".format(np.round(cohens_d,3))
+        print(str("\nProbability to detect a significant group difference when the estimated effect size d = {}".format(np.round(cohens_d,3))
               + " with {} trials and {} participants per group: {}%".format(ntrials,
                                                                          npp_per_group, np.round(power_estimate*100,2))))
         return allreps_output, power_estimate

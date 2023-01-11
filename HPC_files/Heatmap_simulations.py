@@ -13,7 +13,7 @@ import seaborn as sns
 from scipy import stats as stat
 
 
-folder = '/Users/pieter/Documents/GitHub/COMPASS/HPC_files/Output'
+folder = '/Users/pieter/Documents/GitHub/CogComNeuroSci_COMPASS/HPC_files/Output'
 criterion = 'GD'
 sd = 0.1
 nreps = 1000
@@ -32,7 +32,7 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
         #title = "Pr(" + "\u1FB6" + "_g1 >" + "\u1FB6" + "_g2" + ") with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
         title = "Pr(T-statistic > tau) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
     elif criterion == 'EC':
-        ess = [.1]#, .3]
+        ess = [.1, .3]
         #title = "Pr("+"\u03C1"+"("+ "\u1FB6" + "," + "\u03B4" +")) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
         title = "Pr(External correlation > tau) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
     else:
@@ -68,10 +68,11 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
             Power_array = Power_df
 
         sns.heatmap(Power_array, vmin = 0, vmax = 1, ax = axes[i], cmap = "viridis", annot=True, fmt='.2f')
+        axes[i].invert_yaxis()
         fig.suptitle(title, fontweight = 'bold')
         axes[i].set_ylabel('trials', loc = 'top')
         axes[i].set_xlabel('participants', loc = 'right')
-        if criterion == 'IC': axes[i].set_title("SD = {}".format(sd))
+        if criterion == 'IC': axes[i].set_title("Learning rate SD = {}".format(sd))
         elif criterion == 'GD': axes[i].set_title("Cohen\'s d = {}".format(ess[i]))
         elif criterion == 'EC': axes[i].set_title("True correlation = {}".format(ess[i]))
 

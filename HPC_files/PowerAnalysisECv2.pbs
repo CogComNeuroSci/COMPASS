@@ -2,7 +2,7 @@
 
 #PBS -l nodes=1:ppn=36		# ppn should be multiple of 9, max. 36 ppn on victini cluster
 
-#PBS -l walltime=40:00:00
+#PBS -l walltime=48:00:00
 
 #PBS -m abe				  ## send mail
 
