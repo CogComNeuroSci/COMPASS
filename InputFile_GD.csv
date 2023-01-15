@@ -1,4 +1,2 @@
 ntrials,nreversals,npp_group,meanLR_g1,sdLR_g1,meanLR_g2,sdLR_g2,meanInverseTemperature_g1,sdInverseTemperature_g1,meanInverseTemperature_g2,sdInverseTemperature_g2,reward_probability,TypeIerror,nreps,full_speed,output_folder
-90,5,75,0.525,0.1,0.575,0.1,1.5,0.5,2,1,0.9,0.05,250,1,/Users/pieter/Desktop/Compass_results
-90,5,50,0.525,0.1,0.575,0.1,1.5,0.5,2,1,0.9,0.05,250,1,/Users/pieter/Desktop/Compass_results
-180,10,75,0.525,0.1,0.575,0.1,1.5,0.5,2,1,0.9,0.05,250,1,/Users/pieter/Desktop/Compass_results
+270,15,75,0.525,0.1,0.575,0.1,1.5,0.5,2,1,0.9,0.05,250,1,/Users/pieter/Desktop/Compass_results

@@ -14,18 +14,19 @@ from scipy import stats as stat
 
 
 folder = '/Users/pieter/Documents/GitHub/CogComNeuroSci_COMPASS/HPC_files/Output'
-criterion = 'GD'
+criterion = 'IC'
 sd = 0.1
 nreps = 1000
 
 def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
                ireversal = 40, npp = np.arange(40, 201, 20),
-           sd = 0.2, main_folder = folder, nreps = 100, tau = 0.75, typeIerror = 0.05):
+           sd = 0.2, main_folder = folder, nreps = 100, tau = 0.5, typeIerror = 0.05):
     if criterion == 'IC':
         ess = [.1, .2]
         ES_text = ''
         #title = "Pr("+"\u03C1"+"("+ "\u1FB6" + "," + "\u03B1" +")) >= {}) with Nreps = {}".format(tau, nreps)
         title = "Pr(Internal correlation >= {}) with Nreps = {}".format(tau, nreps)
+        print(tau)
         tau = tau
     elif criterion == 'GD':
         ess = [.2, .5]
@@ -91,4 +92,4 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
 
 
 
-Power_df = plot3D(criterion = criterion, sd = sd, nreps = nreps, tau = 0.75)
+Power_df = plot3D(criterion = criterion, sd = sd, nreps = nreps, tau = 0.5)
