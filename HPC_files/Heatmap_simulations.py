@@ -14,7 +14,7 @@ from scipy import stats as stat
 
 
 folder = '/Users/pieter/Documents/GitHub/CogComNeuroSci_COMPASS/HPC_files/Output'
-criterion = 'IC'
+criterion = 'GD'
 sd = 0.1
 nreps = 1000
 
@@ -22,7 +22,7 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
                ireversal = 40, npp = np.arange(40, 201, 20),
            sd = 0.2, main_folder = folder, nreps = 100, tau = 0.5, typeIerror = 0.05):
     if criterion == 'IC':
-        ess = [.1, .2]
+        ess = [.05, .1, .2]
         ES_text = ''
         #title = "Pr("+"\u03C1"+"("+ "\u1FB6" + "," + "\u03B1" +")) >= {}) with Nreps = {}".format(tau, nreps)
         title = "Pr(Internal correlation >= {}) with Nreps = {}".format(tau, nreps)
@@ -33,7 +33,7 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
         #title = "Pr(" + "\u1FB6" + "_g1 >" + "\u1FB6" + "_g2" + ") with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
         title = "Pr(T-statistic > tau) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
     elif criterion == 'EC':
-        ess = [.1, .3]
+        ess = [.1, .3, .5]
         #title = "Pr("+"\u03C1"+"("+ "\u1FB6" + "," + "\u03B4" +")) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
         title = "Pr(External correlation > tau) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
     else:
@@ -42,7 +42,7 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
     plot_folder = os.path.join(main_folder, 'Figures')
     if not os.path.isdir(plot_folder): os.makedirs(plot_folder)
 
-    fig, axes = plt.subplots(nrows = 1, ncols = 2)
+    fig, axes = plt.subplots(nrows = 1, ncols = 3)
     for i in range(len(ess)):
         if criterion =='IC':
             sd = ess[i]
@@ -78,12 +78,12 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
         elif criterion == 'EC': axes[i].set_title("True correlation = {}".format(ess[i]))
 
 
-    labels = ["A", "B"]
-    coord = [(0.025, 0.91), (0.525, 0.91)]
+    labels = ["A", "B", "C"]
+    coord = [(0.025, 0.91), (0.355, 0.91), (0.685, 0.91)]
     for j in  range(len(labels)):
         # label physical distance to the lef
         fig.text(coord[j][0], coord[j][1], labels[j], fontsize='medium', fontweight = "bold", va='bottom')
-    fig.set_size_inches((12, 6), forward=False)
+    fig.set_size_inches((15, 6), forward=False)
     fig.tight_layout()
     fig.savefig(os.path.join(plot_folder, 'Heatmap{}_{}nreps.png'.format(criterion, nreps)))
 
