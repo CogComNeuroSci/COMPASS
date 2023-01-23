@@ -10,7 +10,7 @@ In the current version, use is limited to the Rescorla-Wagner (RW) model in two-
 More details can be found in the manuscript: *Insert link when preprint is online*
 
 ## Installation guide
-*Step 1:* Downloading all folders and storing them locally on your own pc. 
+*Step 1:* Downloading all code and storing them locally on your own pc. 
 
 *Step 2:* Creating the PyPower environment  
   
