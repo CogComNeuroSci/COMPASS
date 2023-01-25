@@ -14,7 +14,7 @@ from scipy import stats as stat
 
 
 folder = '/Users/pieter/Documents/GitHub/CogComNeuroSci_COMPASS/HPC_files/Output'
-criterion = 'GD'
+criterion = 'IC'
 sd = 0.1
 nreps = 1000
 
@@ -26,10 +26,9 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
         ES_text = ''
         #title = "Pr("+"\u03C1"+"("+ "\u1FB6" + "," + "\u03B1" +")) >= {}) with Nreps = {}".format(tau, nreps)
         title = "Pr(Internal correlation >= {}) with Nreps = {}".format(tau, nreps)
-        print(tau)
         tau = tau
     elif criterion == 'GD':
-        ess = [.2, .5]
+        ess = [.2, .5, .8]
         #title = "Pr(" + "\u1FB6" + "_g1 >" + "\u1FB6" + "_g2" + ") with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
         title = "Pr(T-statistic > tau) with p-value threshold = {} and Nreps = {}".format(typeIerror, nreps)
     elif criterion == 'EC':
@@ -68,22 +67,22 @@ def plot3D(criterion = 'IC', ntrials = np.arange(80, 1000, 160),
 
             Power_array = Power_df
 
-        sns.heatmap(Power_array, vmin = 0, vmax = 1, ax = axes[i], cmap = "viridis", annot=True, fmt='.2f')
+        sns.heatmap(Power_array, vmin = 0, vmax = 1, ax = axes[i], cmap = "viridis", annot=True, annot_kws={"fontsize":11}, fmt='.2f')
         axes[i].invert_yaxis()
-        fig.suptitle(title, fontweight = 'bold')
-        axes[i].set_ylabel('trials', loc = 'top')
-        axes[i].set_xlabel('participants', loc = 'right')
-        if criterion == 'IC': axes[i].set_title("Learning rate SD = {}".format(sd))
-        elif criterion == 'GD': axes[i].set_title("Cohen\'s d = {}".format(ess[i]))
-        elif criterion == 'EC': axes[i].set_title("True correlation = {}".format(ess[i]))
+        fig.suptitle(title, fontweight = 'bold', fontsize = 14)
+        axes[i].set_ylabel('trials', loc = 'top', fontsize = 12)
+        axes[i].set_xlabel('participants', loc = 'right', fontsize = 12)
+        if criterion == 'IC': axes[i].set_title("Learning rate SD = {}".format(sd), fontsize = 14)
+        elif criterion == 'GD': axes[i].set_title("Cohen\'s d = {}".format(ess[i]), fontsize = 14)
+        elif criterion == 'EC': axes[i].set_title("True correlation = {}".format(ess[i]), fontsize = 14)
 
 
     labels = ["A", "B", "C"]
     coord = [(0.025, 0.91), (0.355, 0.91), (0.685, 0.91)]
     for j in  range(len(labels)):
         # label physical distance to the lef
-        fig.text(coord[j][0], coord[j][1], labels[j], fontsize='medium', fontweight = "bold", va='bottom')
-    fig.set_size_inches((15, 6), forward=False)
+        fig.text(coord[j][0], coord[j][1], labels[j], fontsize = 12, fontweight = "bold", va='bottom')
+    fig.set_size_inches((15, 6.5), forward=False)
     fig.tight_layout()
     fig.savefig(os.path.join(plot_folder, 'Heatmap{}_{}nreps.png'.format(criterion, nreps)))
 
