@@ -270,7 +270,7 @@ if __name__ == '__main__':
     InputParameters = pd.read_csv(InputFile_path, delimiter = ',')
     if InputParameters.shape[1] == 1: InputParameters = pd.read_csv(InputFile_path, delimiter = ';')	# depending on how you save the csv-file, the delimiter should be "," or ";". - This if-statement ensures that the correct delimiter is used. 
     InputDictionary = InputParameters.to_dict()
-
+    
     # variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
     # if variables_fine == 0: break
 
@@ -286,6 +286,10 @@ if __name__ == '__main__':
         nreps = InputDictionary['nreps'][row]
         full_speed = InputDictionary['full_speed'][row]
         output_folder = InputDictionary['output_folder'][row]
+        
+        if not os.path.isdir(output_folder): 
+            print('output_folder does not exist, please adapt the csv-file')
+            quit()
 
         if criterion == "IC":
             npp = InputDictionary['npp'][row]
