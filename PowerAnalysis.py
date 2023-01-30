@@ -268,6 +268,7 @@ if __name__ == '__main__':
     InputFile_name = "InputFile_{}.csv".format(criterion)
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
     InputParameters = pd.read_csv(InputFile_path, delimiter = ',')
+    if InputParameters.shape[1] == 1: InputParameters = pd.read_csv(InputFile_path, delimiter = ';')	# depending on how you save the csv-file, the delimiter should be "," or ";". - This if-statement ensures that the correct delimiter is used. 
     InputDictionary = InputParameters.to_dict()
 
     # variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
