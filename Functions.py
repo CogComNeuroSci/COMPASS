@@ -205,7 +205,7 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, design =
         response = choose_response(response_probabilities = response_probabilities)
         # store the response given on this trial
         responses = np.append(responses, response)
-    #Update the value of the response-action pair that was relevant this trial (stimulus shown & response given)
+        #Update the value of the response-action pair that was relevant this trial (stimulus shown & response given)
         #define whether reward was received this trial or not: reward present when:
             # a) response = correct response and FB congruence = 1 (congruent)
             # b) response != correct response and FB congruence = 0 (incongruent)
@@ -497,7 +497,7 @@ def Incorrelation_repetition(inverseTemp_distribution, LR_distribution, npp, ntr
         t1 = time.time() - t0
         estimated_seconds = t1 * np.ceil(nreps / ncpu)
         estimated_time = np.ceil(estimated_seconds / 60)
-        print("The power analysis will take ca. {} minutes".format(estimated_time))
+        print("\nThe power analysis will take ca. {} minutes".format(estimated_time))
     # return proportion_failed_estimates, Statistic
     return Statistic
 
@@ -605,7 +605,7 @@ def groupdifference_repetition(inverseTemp_distributions, LR_distributions, npp_
         t1 = time.time() - t0
         estimated_seconds = t1 * nreps / ncpu
         estimated_time = np.ceil(estimated_seconds / 60)
-        print("The power analysis will take ca. {} minutes".format(estimated_time))
+        print("\nThe power analysis will take ca. {} minutes".format(estimated_time))
 
     return Statistic, pValue
 
@@ -714,12 +714,12 @@ def Excorrelation_repetition(inverseTemp_distribution, LR_distribution, true_cor
         t1 = time.time() - t0
         estimated_seconds = t1 * np.ceil(nreps / ncpu)
         estimated_time = np.ceil(estimated_seconds / 60)
-        print("The power analysis will take ca. {} minutes".format(estimated_time))
+        print("\nThe power analysis will take ca. {} minutes".format(estimated_time))
     # return proportion_failed_estimates, Statistic
     return Statistic, pValue, Stat_true
 
 #%%
-def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder):
+def check_input_parameters(ntrials, nreversals, reward_probability, full_speed, criterion, output_folder):
     variables_are_fine = 1
     if ntrials < 5:
         print("ntrials = {}; but minimal number of trials = 5.".format(ntrials))
@@ -727,30 +727,18 @@ def check_input_parameters(ntrials, nreversals, npp, reward_probability, full_sp
     if nreversals >= ntrials:
         print('nreversals = {} and ntrials = {}; but nreversals should be < ntrials.'.format(nreversals, ntrials))
         variables_are_fine = 0
-    if npp < 5:
-        print("npp = {}, but minimal number of participants = 5.".format(npp))
-        variables_are_fine = 0
     if reward_probability < 0 or reward_probability > 1:
         print("reward_probability = {}; but should be element of [0, 1].".format(reward_probability))
     if full_speed != 0 and full_speed != 1:
         print("full_speed = {}, but should be either 0 or 1".format(full_speed))
         variables_are_fine = 0
-    if criterion !=  'correlation' and criterion != 'group_difference':
-        print("criterion = {}, but should be correlation or group_difference".format(criterion))
+    if criterion !=  'IC' and criterion != 'EC' and criterion !='GD':
+        print("criterion = {}, but should be IC, EC or GD".format(criterion))
         variables_are_fine = 0
-    if significance_cutoff < 0 or significance_cutoff > 1:
-        print("significance_cutoff = {}, but should be element of [0, 1]".format(significance_cutoff))
-        variables_are_fine = 0
-    if criterion == 'group_difference' and cohens_d < 0:
-        print("cohens_d = {}, but should be > 0.".format(cohens_d))
-        variables_are_fine = 0
-    if nreps < 1 or nreps != int(nreps):
-        print("nreps = {}; but nreps should be of type integer and should be > 0".format(nreps))
-        variables_are_fine = 0
-    if type(plot_folder) != str:
+    if type(output_folder) != str:
         print("output_folder does not exist")
         variables_are_fine = 0
-    elif not os.path.isdir(plot_folder):
+    elif not os.path.isdir(output_folder):
         print('output_folder does not exist')
         variables_are_fine = 0
 

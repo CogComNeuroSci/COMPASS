@@ -10,12 +10,10 @@ import numpy as np
 import pandas as pd
 from multiprocessing import Pool, cpu_count
 from Functions import create_design, Incorrelation_repetition, groupdifference_repetition, check_input_parameters, Excorrelation_repetition
-from scipy import optimize
 from scipy import stats as stat
 from datetime import datetime
 
 if HPC == False:
-    from statsmodels.stats.power import tt_ind_solve_power
     import seaborn as sns
     import matplotlib.pyplot as plt
 
@@ -143,8 +141,15 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
     #Use beta_distribution to determine the p-value for the hypothesized correlation
     beta_distribution = stat.beta((npp/2)-1, (npp/2)-1, loc = -1, scale = 2)
     true_pValue = 1-beta_distribution.cdf(True_correlation)
+    tau = -beta_distribution.ppf(typeIerror/2)
+    
+    #compute conventional power
+    noncentral_beta = stat.beta((npp/2)-1, (npp/2)-1, loc = -1+True_correlation, scale = 2)
+    conventional_power = 1-noncentral_beta.cdf(tau)
 
-    print(str("\np-value for true correlation is :{}\n".format(np.round(true_pValue,5))))
+    print(str("\nThe correlation cut-off value is: {}".format(np.round(tau,2))))
+    print(str("\np-value for true correlation is :{}".format(np.round(true_pValue,5))))
+    print(str("\nProbability to obtain a significant correlation under conventional power implementation: {}%".format(np.round(conventional_power*100,2))))
 
     #divide process over multiple cores
     pool = Pool(processes = n_cpu)
@@ -158,11 +163,11 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
     allreps_output = pd.DataFrame(out, columns = ['Statistic','estimated_pValue', 'True_pValue'])
 
     #Compute power if estimates would be perfect.
-    power_true = np.mean((allreps_output['True_pValue'] <= typeIerror)*1)
-    print(str("\nProbability to obtain a significant correlation under conventional power implementation: {}%".format(np.round(power_true*100,2))))
+    #power_true = np.mean((allreps_output['True_pValue'] <= typeIerror/2)*1)
+    #print(str("\nProbability to obtain a significant correlation under conventional power implementation: {}%".format(np.round(power_true*100,2))))
 
     #Compute power for correlation with estimated parameter values.
-    power_estimate = np.mean((allreps_output['estimated_pValue'] <= typeIerror)*1)
+    power_estimate = np.mean((allreps_output['estimated_pValue'] <= typeIerror/2)*1)
     print(str("\nProbability to obtain a significant correlation between model parameter and an external measure that is {} correlated".format(True_correlation)
           + " with {} trials and {} participants: {}%".format(ntrials, npp, np.round(power_estimate*100,2))))
 
@@ -226,11 +231,17 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
     if high_performance == True: n_cpu = cpu_count() - 2
     else: n_cpu = 1
     if __name__ == '__main__':
-        # First: check what the power is when parameter estimations are perfect
-        if HPC == False:
-            power_true = tt_ind_solve_power(nobs1 = npp_per_group, ratio = 1, effect_size = cohens_d, alpha = typeIerror, power = None,
-                                    alternative = 'larger')
-            print("\nProbability to obtain a significant group difference under conventional power implementation: {}%".format(np.round(power_true*100,2)))
+        
+        #Use t_distribution to determine the p-value for the hypothesized cohen's d
+        true_pValue = 1-stat.t.cdf(cohens_d*np.sqrt(npp_per_group), (npp_per_group-1)*2)
+        tau = -stat.t.ppf(typeIerror/2, (npp_per_group-1)*2)
+        
+        #Compute conventional power
+        conventional_power = 1-stat.nct.cdf(tau, (npp_per_group-1)*2, cohens_d*np.sqrt(npp_per_group))
+
+        print(str("\nThe t-distribution cut-off value is: {}".format(np.round(tau,2))))
+        print(str("\np-value for given cohen's d is :{}".format(np.round(true_pValue,5))))
+        print("\nProbability to obtain a significant group difference under conventional power implementation: {}%".format(np.round(conventional_power*100,2)))
 
         #divide process over multiple cores
         if mean_LRdistributionG1 > mean_LRdistributionG2:
@@ -251,7 +262,7 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
 
         # check for which % of repetitions the group difference was significant
         # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
-        power_estimate = np.mean((allreps_output['PValue'] <= typeIerror))
+        power_estimate = np.mean((allreps_output['PValue'] <= typeIerror/2))
         print(str("\nProbability to detect a significant group difference when the estimated effect size d = {}".format(np.round(cohens_d,3))
               + " with {} trials and {} participants per group: {}%".format(ntrials,
                                                                          npp_per_group, np.round(power_estimate*100,2))))
@@ -270,9 +281,6 @@ if __name__ == '__main__':
     InputParameters = pd.read_csv(InputFile_path, delimiter = ',')
     if InputParameters.shape[1] == 1: InputParameters = pd.read_csv(InputFile_path, delimiter = ';')	# depending on how you save the csv-file, the delimiter should be "," or ";". - This if-statement ensures that the correct delimiter is used. 
     InputDictionary = InputParameters.to_dict()
-    
-    # variables_fine = check_input_parameters(ntrials, nreversals, npp, reward_probability, full_speed, criterion, significance_cutoff, cohens_d, nreps, plot_folder)
-    # if variables_fine == 0: break
 
     for row in range(InputParameters.shape[0]):
         #Calculate how long it takes to do a power estimation
@@ -287,9 +295,12 @@ if __name__ == '__main__':
         full_speed = InputDictionary['full_speed'][row]
         output_folder = InputDictionary['output_folder'][row]
         
-        if not os.path.isdir(output_folder): 
-            print('output_folder does not exist, please adapt the csv-file')
-            quit()
+        variables_fine = check_input_parameters(ntrials, nreversals, reward_probability, full_speed, criterion, output_folder)
+        if variables_fine == 0: quit()
+        
+        #if not os.path.isdir(output_folder): 
+        #    print('output_folder does not exist, please adapt the csv-file')
+        #    quit()
 
         if criterion == "IC":
             npp = InputDictionary['npp'][row]
@@ -323,7 +334,7 @@ if __name__ == '__main__':
             meanInverseT_g2, sdInverseT_g2 = InputDictionary['meanInverseTemperature_g2'][row], InputDictionary['sdInverseTemperature_g2'][row]
             typeIerror = InputDictionary['TypeIerror'][row]
             # Calculate tau based on the typeIerror and the df
-            tau = -stat.t.ppf(typeIerror, npp-1)
+            tau = -stat.t.ppf(typeIerror/2, npp-1)
             s_pooled = np.sqrt((sdLR_g1**2 + sdLR_g2**2) / 2)
             cohens_d = np.abs(meanLR_g1-meanLR_g2)/s_pooled
 
@@ -379,7 +390,7 @@ if __name__ == '__main__':
         if HPC == False:
             fig.legend(loc = 'center right')
             fig.tight_layout()
-            fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M.jpg'.format(criterion,
+            fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M{}.jpg'.format(criterion,
                                                                                     np.round(s_pooled, 2),
                                                                                     ntrials, nreversals,
                                                                                     npp, nreps)))
