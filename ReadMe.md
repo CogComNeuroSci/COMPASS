@@ -9,7 +9,7 @@ In the current version, use is limited to the Rescorla-Wagner (RW) model in two-
 
 More details can be found in the manuscript: *https://10.31234/osf.io/dexyk*
 
-*We now also provide a script to easily fit the RW model on your own empirical data!!!*
+**We now also provide a script to easily fit the RW model on your own empirical data!!!**
 
 More details are provided at the end of this page.
 
@@ -224,19 +224,19 @@ Power computations consist of the following five steps:
     
     <img width="500" alt="image" src="https://github.com/CogComNeuroSci/COMPASS/blob/main/Figures_ReadMe//Output_plot.png">
     
-##Fitting the RW model on your data
-###Requires a specifically structured folder with behavioural data files:
+## Fitting the RW model on your data
+### Requires a specifically structured folder with behavioural data files:
   - Relevant files should follow this format: *Data_Subject_{SubjectID}.csv*
   Here, {SubjectID} can be a number or string identifying that specific subject.
   - Files should contain four columns: Trial, Stimulus, Response and Reward
   - Stimulus and Response should be coded as integer going from 0 to the number of stimuli or responses (e.g., 0 and 1 if there are two response options)
   - No other csv files should be in your folder!
 
-###Returns:
+### Returns:
   - *Fitting_results.csv* file, containing a row for each subject and four columns: *SubjectID, Estimated_LR, Estimated_InvTemp and Negative_LogL*
   - Updated files for each subject. To each individual file, two rows are added: *Response_likelihood and Prediction_Error*
   
-###Running the fitting procedure:
+### Running the fitting procedure:
 
 To use our environment:   
    * Open Anaconda prompt
