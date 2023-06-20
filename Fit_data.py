@@ -7,16 +7,18 @@ Created on Mon Jun 19 11:35:59 2023
 
 Putting together functions to perform parameter estimations
 """
+# Import modules
 import os, sys
 import numpy as np
 import pandas as pd
 from scipy import optimize
 from Functions import softmax, delta_rule, LR_retransformation, InverseT_retransformation
 
+#Avoid warnings
 import warnings
 warnings.filterwarnings('ignore')
     
-    
+#Likelihood function for empirical data
 def likelihood(parameter_set, data):
     """
 
@@ -25,16 +27,13 @@ def likelihood(parameter_set, data):
     parameter_set : numpy array, shape = (2,)
         Contains the current estimates for each parameter used to calculate the likelihood of the data given this parameter set.
         Contains two values: parameter_set[0] = learning rate, parameter_set[1] = inverse_temperature
-    data : numpy array, shape = (ntrials X 5)
-        Data that will be used to estimate the likelihood of the data given the current parameter set. The data should be a numpy array of size (number of trials X 5).
-        Its columns are: [stimulus-response mapping rule, stimulus, response, correct response, feedback congruence].
-            The stimulus-response mapping rule column should contain a value of 0 or 1 for each trial (= rule 0 or rule 1)
-            The stimulus column should contain a value of 0 or 1 for each trial (= stimulus 0 or stimulus 1)
-            The response column should contain the simulated responses for the current hypothetical participant (simulated with the function simulate_responses).
-            The correct response column should contain which response would be correct on this trial; this depends on the stimulus-response mapping rule and the stimulus for that trial.
-            The feedback congruencey column should contain a value of 0 or 1 on each trial with 0 = 'feedback is not in line with the current stimulus-response mapping rule' and 1 = 'feedback is in line with the current stimulus-response mapping rule'.
-        Importantly, columns 0, 1, 3 and 4 should be exactly the same as the design matrix used to simulate the responses for this hypothetical participant.
-
+    data : csv file name = (ntrials X 4)
+        Data that will be used to estimate the likelihood of the data given the current parameter set. The data should contain one row per trial and 4 columns,
+        Its columns are: [Trial, Stimulus, Response, Reward].
+            The Trial column should contain a value indicating the trial number in increasing order.
+            The Stimulus column should contain an integer value of 0 to Nstim-1 for each trial, indicating which stimulus is presented
+            The Response column should contain an integer value of 0 to Nresp-1 for each trial, indicating which response was given by the participant
+            The Reward column contains a value for the reward that is given to the participant on each trial.
     Returns
     -------
     -summed_logL : float
@@ -56,15 +55,15 @@ def likelihood(parameter_set, data):
     retransformed_LR = LR_retransformation(parameter_set[0])
     retransformed_invT = InverseT_retransformation(parameter_set[1])
 
-    df = pd.read_csv(data)           #Read data
-    ntrials = df.shape[0]                 #Number of trials
+    df = pd.read_csv(data)                #Read data
+    ntrials = df.shape[0]                 #Extract number of trials
     
-    nstim = len(np.unique(df.iloc[:,1]))
-    nresp = len(np.unique(df.iloc[:,2]))
+    nstim = len(np.unique(df.iloc[:,1]))  #Extract number of stimuli
+    nresp = len(np.unique(df.iloc[:,2]))  #Extract number of responses
     
 #Prepare the likelihood estimation process: make sure all relevant variables are defined
-    # the start values for each stimulus-response pair: these are the same as in the simulate_responses function
-    values = np.ones((nstim, nresp))/nresp
+    # the start values for each stimulus-response pair: a-priori, every response is equally likely and the values are scaled with the max reward
+    values = (np.ones((nstim, nresp))/nresp )* np.max(df.iloc[:,3])
 
 #Start the likelihood estimation process: summed_logL = log(L(parameter set|data))
     # log(L(parameter set|data)) = sum( log( L(parameter set|response) ) for trial in trials)
@@ -75,15 +74,11 @@ def likelihood(parameter_set, data):
     #Define the variables that are important for the likelihood estimation process
         stimulus = int(df.iloc[trial,1]) #the stimulus shown on this trial
         response = int(df.iloc[trial,2]) #the response given on this trial
-        reward_this_trial = int(df.iloc[trial,3]) #the reward presence or absence on this trial
+        reward_this_trial = int(df.iloc[trial,3]) #the reward given on this trial
 
     #Calculate the loglikelihood: log(L(parameter set|response)) = log(P(response|parameter set))
         #select the correct response_values given the stimulus on this trial
         stimulus_weights = values[stimulus, :]
-        #log(P(response|parameter set)) = log(exp(value_responseX*inverse_temperature) / (exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = current response (0 or 1))
-            # which can be simplified to: value_responseX*inverse_temperature - log(exp(value_response0*inverse_temperature) + exp(value_response1*inverse_temperature)) with X = current response
-            # used mathematical rule: log( exp(x) / (exp(x)+exp(y)) ) = x - log(exp(x)+exp(y))
-        #probabilities = np.exp(loglikelihoods) --> this has to be equal to 1
 
         # this to ensure no overflows are encountered in the estimation process
         if np.abs(retransformed_invT) > 99:
@@ -116,15 +111,13 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, data = "
         Value for the learning rate parameter that will be used to simulate data for this participant. The default is 0.5.
     simulation_inverseTemp : float, optional
         Value for the inverse temperature parameter that will be used to simulate data for this participant. The default is 1.
-    design : numpy array, shape = (ntrials X 5)
-        Design that will be used to simulate data for this participant. The design should be a numpy array of size (number of trials X 5).
-        Its columns are: [stimulus-response mapping rule, stimulus, response, correct response, feedback congruence].
-            The stimulus-response mapping rule column should contain a value of 0 or 1 for each trial (= rule 0 or rule 1)
-            The stimulus column should contain a value of 0 or 1 for each trial (= stimulus 0 or stimulus 1)
-            The response column should be empty still, data has not yet been generated.
-            The correct response column should contain which response would be correct on this trial; this depends on the stimulus-response mapping rule and the stimulus for that trial.
-            The feedback congruencey column should contain a value of 0 or 1 on each trial with 0 = 'feedback is not in line with the current stimulus-response mapping rule' and 1 = 'feedback is in line with the current stimulus-response mapping rule'.
-
+    design : csv file name = (ntrials X 4)
+        Data that will be used to estimate the likelihood of a response and prediction error given the current parameter set. The data should contain one row per trial and 4 columns,
+        Its columns are: [Trial, Stimulus, Response, Reward].
+            The Trial column should contain a value indicating the trial number in increasing order.
+            The Stimulus column should contain an integer value of 0 to Nstim-1 for each trial, indicating which stimulus is presented
+            The Response column should contain an integer value of 0 to Nresp-1 for each trial, indicating which response was given by the participant
+            The Reward column contains a value for the reward that is given to the participant on each trial.
     Returns
     -------
     responses : numpy array (with elements of type integer), shape = (ntrials,)
@@ -136,13 +129,15 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, data = "
     The design used for data generation for this participant should also be used for parameter estimation for this participant when running the function 'likelihood_estimation'."""
 
     df = pd.read_csv(data)           #Read data
-    ntrials = df.shape[0]    
+    ntrials = df.shape[0]            #Extract number of trials
         
-    nstim = len(np.unique(df.iloc[:,1]))
-    nresp = len(np.unique(df.iloc[:,2]))
+    nstim = len(np.unique(df.iloc[:,1]))  #Extract number of stimuli
+    nresp = len(np.unique(df.iloc[:,2]))  #Extract number of responses
     
-    values = np.ones((nstim, nresp))/nresp
+    # the start values for each stimulus-response pair: a-priori, every response is equally likely and the values are scaled with the max reward
+    values = (np.ones((nstim, nresp))/nresp )* np.max(df.iloc[:,3])
 
+    # A column list for the output file: we add two columns (Response_likelihood and PE_estimate)
     column_list = ["Trial", "Stimulus", "Response", "Reward", "Response_likelihood", "PE_estimate"]
     simulated_data = pd.DataFrame(columns=column_list)
     
@@ -152,7 +147,7 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, data = "
     #Define the variables you'll need for this trial (take them from the design)
         stimulus = int(df.iloc[trial,1])  #the stimulus shown on this trial
         response = int(df.iloc[trial,3])  #the response given on this trial
-        reward_this_trial = int(df.iloc[trial,3])  #the reward presence or absence on this trial
+        reward_this_trial = int(df.iloc[trial,3])  #the reward on this trial
 
     #Simulate the response given by the hypothetical participant. Depending on the value for each response and the inverse_temperature parameter.
 
@@ -170,47 +165,59 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, data = "
         #update the value of the stimulus-response pair that was used this trial
         values[stimulus, response] = updated_value
         
+        #Store trial data
         simulated_data.loc[trial] = [int(df.iloc[trial,0]) , stimulus, response, reward_this_trial, response_likelihood, PE]
-    
+
+    #Write to output file
     simulated_data.to_csv(data, columns = column_list, float_format ='%.3f')
     return
 
 if __name__ == '__main__':
+    #Extract path to data folder
     directory = sys.argv[1:]
     assert len(directory) == 1
     directory = directory[0]
-    
+
+    #Get a list of files in the folder and filter on csv files that are not previous fitting results
     filelist = os.listdir(directory)
     filtered_filelist = [x for x in filelist if x[-3::]=="csv"]
     filtered_filelist = [x for x in filtered_filelist if x != "Fitting_results.csv"]
-    
+
+    #Go to that directory
     os.chdir(directory)
-    
+
+    #Define the starting parameters for the likelihood
     start_params = np.random.uniform(-4.5, 4.5), np.random.uniform(-4.6, 2)
-    
+
+    #Define columns for output file
     column_list = ["Subject_ID", "Estimated_LR", "Estimated_InvTemp", "Negative_LogL"]
     estimated_data = pd.DataFrame(columns=column_list)
     
     idx = -1
     for file in filtered_filelist:
         idx +=1
+        #Get subject ID
         sub = file.split("_")[2][0:-4]
         
         print("*** Started minimizing negative log likelihood of subject: {} ***\n".format(sub))
-            
+        #Minimize negative loglikelihood
         optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([file])), method = 'Nelder-Mead', options = {'maxfev':10000, 'xatol':0.001, 'return_all':1})
 
+        #Get minimum log likelihood and parameter estimations
         LL = optimization_output['fun']
         estimated_parameters = optimization_output['x']
         lr = LR_retransformation(estimated_parameters[0])
         inv_temp = InverseT_retransformation(estimated_parameters[1])
         
         print("estimated learning rate is: {0} and estimated inverse temperature is: {1}.\n\n".format(lr, inv_temp))
+        #Store everything in output file
         estimated_data.loc[idx] = [sub, lr, inv_temp, LL]
-        
+
+        #Simulate with fitted parameters
         simulate_responses(lr, inv_temp, file)
         
         print("Simulated data")
-    
+
+    #Write results of parameter fitting
     estimated_data.to_csv("Fitting_results.csv", columns = column_list, float_format ='%.3f')
     print("End of fitting procedure")
