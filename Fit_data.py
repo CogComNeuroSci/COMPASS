@@ -146,7 +146,7 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, data = "
 
     #Define the variables you'll need for this trial (take them from the design)
         stimulus = int(df.iloc[trial,1])  #the stimulus shown on this trial
-        response = int(df.iloc[trial,3])  #the response given on this trial
+        response = int(df.iloc[trial,2])  #the response given on this trial
         reward_this_trial = int(df.iloc[trial,3])  #the reward on this trial
 
     #Simulate the response given by the hypothetical participant. Depending on the value for each response and the inverse_temperature parameter.
@@ -169,7 +169,7 @@ def simulate_responses(simulation_LR = 0.5, simulation_inverseTemp = 1, data = "
         simulated_data.loc[trial] = [int(df.iloc[trial,0]) , stimulus, response, reward_this_trial, response_likelihood, PE]
 
     #Write to output file
-    simulated_data.to_csv(data, columns = column_list, float_format ='%.3f')
+    simulated_data.to_csv(data[0:-4]+"_Simulated.csv", columns = column_list, float_format ='%.3f')
     return
 
 if __name__ == '__main__':
@@ -182,6 +182,7 @@ if __name__ == '__main__':
     filelist = os.listdir(directory)
     filtered_filelist = [x for x in filelist if x[-3::]=="csv"]
     filtered_filelist = [x for x in filtered_filelist if x != "Fitting_results.csv"]
+    filtered_filelist = [x for x in filtered_filelist if x[-13::] != "Simulated.csv"]
 
     #Go to that directory
     os.chdir(directory)
@@ -201,7 +202,7 @@ if __name__ == '__main__':
         
         print("*** Started minimizing negative log likelihood of subject: {} ***\n".format(sub))
         #Minimize negative loglikelihood
-        optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([file])), method = 'Nelder-Mead', options = {'maxfev':10000, 'xatol':0.001, 'return_all':1})
+        optimization_output = optimize.minimize(likelihood, start_params, args =(tuple([file])), method = 'Nelder-Mead', options = {'maxfev':10000, 'xatol':0.00001, 'return_all':0})
 
         #Get minimum log likelihood and parameter estimations
         LL = optimization_output['fun']
