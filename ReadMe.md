@@ -234,7 +234,7 @@ Power computations consist of the following five steps:
 
 ### Returns:
   - *Fitting_results.csv* file, containing a row for each subject and four columns: *SubjectID, Estimated_LR, Estimated_InvTemp and Negative_LogL*
-  - Updated files for each subject. To each individual file, two rows are added: *Response_likelihood and Prediction_Error*
+  - Updated files for each subject. To each individual file, two rows are added: *Response_likelihood and PE_estimate*
   
 ### Running the fitting procedure:
 
@@ -244,7 +244,7 @@ To use our environment:
    
 To run the fitting procedure:
    * Go to the directory where the COMPASS files are stored using ```cd```  
-   * Now, run: ```python Fit_data.py {"datafolder"}``` where {"datafolder"} represents a string indicating the folder where your data is located
+   * Now, run: ```python Fit_data.py {"datafolder"}``` where {"datafolder"} represents a string indicating the path to the folder where your data is located
   
 # Contact
 - Corresponding author: Pieter Verbeke
