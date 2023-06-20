@@ -1,5 +1,5 @@
 [![Uni](https://img.shields.io/badge/University-Ghent%20University-brightgreen)](https://img.shields.io/badge/University-Ghent%20University-brightgreen)
-[![Date](https://img.shields.io/badge/Last%20update-2022-yellow)](https://img.shields.io/badge/Last%20update-2022-yellow)
+[![Date](https://img.shields.io/badge/Last%20update-2023-yellow)](https://img.shields.io/badge/Last%20update-2023-yellow)
 
 # COmputational Power Analysis using Simulations "COMPASS" toolbox 
 
@@ -234,7 +234,7 @@ Power computations consist of the following five steps:
 
 ### Returns:
   - *Fitting_results.csv* file, containing a row for each subject and four columns: *SubjectID, Estimated_LR, Estimated_InvTemp and Negative_LogL*
-  - Updated files for each subject. To each individual file, two rows are added: *Response_likelihood and PE_estimate*
+  - Simulated files for each subject. A copy of each individual file is saved, containing two additional rows: *Response_likelihood and PE_estimate*
   
 ### Running the fitting procedure:
 
