@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Dec 14 11:04:23 2021
+MOdified on june 2023
 
-@author: maudb
+@author: maudb, Luning He
 """
+import os
+os.chdir('D:horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/')
+#%%
 HPC = False
 
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool, cpu_count
-from Functions import create_design, Incorrelation_repetition, groupdifference_repetition, check_input_parameters, Excorrelation_repetition
+from Functions_DDM import Incorrelation_repetition, groupdifference_repetition, Excorrelation_repetition
 from scipy import stats as stat
 from datetime import datetime
-
+import ssms
 if HPC == False:
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -21,10 +25,13 @@ if HPC == False:
 import warnings
 warnings.filterwarnings('ignore')
 
+#%% RL functions
 
-def power_estimation_Incorrelation(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False,
+def power_estimation_Incorrelation_RL(npp = 30, ntrials = 480, nreversals = 12, cut_off = 0.7, high_performance = False,
                                  nreps = 100, reward_probability = 0.8, mean_LRdistribution = 0.5, SD_LRdistribution = 0.1,
                                  mean_inverseTempdistribution = 2.0, SD_inverseTempdistribution = 1.0):
+    
+    
     """
 
     Parameters
@@ -88,7 +95,8 @@ def power_estimation_Incorrelation(npp = 30, ntrials = 480, nreversals = 12, cut
 
     return allreps_output, power_estimate
 
-def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, typeIerror = 0.05, high_performance = False,
+
+def power_estimation_Excorrelation_RL(npp = 100, ntrials = 480, nreversals = 12, typeIerror = 0.05, high_performance = False,
                                  nreps = 100, reward_probability = 0.8, mean_LRdistribution = 0.5, SD_LRdistribution = 0.1,
                                  mean_inverseTempdistribution = 2.0, SD_inverseTempdistribution = 1.0, True_correlation = .5):
     """
@@ -173,7 +181,7 @@ def power_estimation_Excorrelation(npp = 100, ntrials = 480, nreversals = 12, ty
 
     return allreps_output, power_estimate
 
-def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 100, typeIerror = 0.05,
+def power_estimation_groupdifference_RL(npp_per_group = 20, ntrials = 480, nreps = 100, typeIerror = 0.05,
                                      high_performance = False, nreversals = 12, reward_probability = 0.8,
                                      mean_LRdistributionG1 = 0.5, SD_LRdistributionG1 = 0.1,
                                      mean_LRdistributionG2 = 0.5, SD_LRdistributionG2 = 0.1,
@@ -268,63 +276,169 @@ def power_estimation_groupdifference(npp_per_group = 20, ntrials = 480, nreps = 
                                                                          npp_per_group, np.round(power_estimate*100,2))))
         return allreps_output, power_estimate
 
-#%%
+#%% DDM functions
+def power_estimation_Incorrelation(npp = 30, ntrials = 480, cut_off = 0.7, high_performance = False, nreps = 100, 
+                                   means = None, stds = None, DDM_id = 'angle',param_bounds = None):
+    
+    
+    """
+
+    Parameters
+    ----------
+    npp : integer
+        Number of participants in the study.
+    ntrials : integer
+        Number of trials that will be used to do the parameter recovery analysis for each participant.
+    nreversals : integer
+        The number of rule-reversals that will occur in the experiment. Should be smaller than ntrials.
+    cut_off : float
+        Critical value that will be used to evaluate whether the repetition was successful.
+    high_performance : bool (True or False)
+        Defines whether multiple cores on the computer will be used in order to estimate the power.
+    nreps : integer
+        Number of repetitions that will be used for the parameter estimation process.
+    reward_probability : float (element within [0, 1]), optional
+        The probability that reward will be congruent with the current stimulus-response mapping rule. The default is 0.8.
+    mean_LRdistribution: float
+        Mean for the normal distribution to sample learning rates from.
+    SD_LRdistribution: float
+        Standard deviation for the normal distribution to sample learning rates from.
+    mean_inverseTempdistribution: float
+        Mean for the normal distribution to sample inverse temperatures from.
+    SD_inverseTempdistribution: float
+        Standard deviation for the normal distribution to sample inverse temperatures from.
+
+    Returns
+    -------
+    allreps_output : TYPE
+        Pandas dataframe containing the correlation value on each repetition.
+    power_estimate: float [0, 1]
+        The power estimation: number of reps for which the parameter recovery was successful (correlation > significance_cutoff) divided by the total number of reps.
+
+    Description
+    -----------
+    Function that actually calculates the probability to obtain adequate parameter estimates.
+    Parameter estimates are considered to be adequate if their correlation with the true parameters is minimum the cut_off.
+    Power is calculated using a Monte Carlo simulation-based approach.
+    """
+    
+    # RL design
+    # start_design = create_design(ntrials = ntrials, nreversals = nreversals, reward_probability = reward_probability)
+    
+    if HPC == True: n_cpu = cpu_count()
+    elif high_performance == True: n_cpu = cpu_count() - 2
+    else: n_cpu = 1
+    #divide process over multiple cores
+    pool = Pool(processes = n_cpu)
+    
+    # Parameter distribution
+    
+# =============================================================================
+#     # Incorrelation_repetition(means ,stds , 
+#                                      param_bounds , 
+#                                      npp = 150, 
+#                                      ntrials = 450, DDM_id = "angle", rep=1, nreps = 250, ncpu = 6):
+# =============================================================================
+    out = pool.starmap(Functions_DDM.Incorrelation_repetition, [(means,stds, param_bounds, 
+                                                   npp, ntrials,DDM_id,
+                                                   rep, nreps, n_cpu) for rep in range(nreps)])
+    pool.close()
+    pool.join()
+
+    allreps_output = pd.DataFrame(out, columns = ['correlations'])
+
+
+    power_estimate = np.mean((allreps_output['correlations'] >= cut_off)*1)
+    print(str("\nProbability to obtain a correlation(true_param, param_estim) >= {}".format(cut_off)
+          + " with {} trials and {} participants: {}%".format(ntrials, npp, power_estimate*100)))
+
+    return allreps_output, power_estimate
+
+#%% 
 import os, sys
 
 if __name__ == '__main__':
-    criterion = sys.argv[1:]
-    assert len(criterion) == 1
+# =============================================================================
+#     criterion = sys.argv[1:]
+#     assert len(criterion) == 1
+# =============================================================================
+    criterion = ['IC']
     criterion = criterion[0]
+    DDM_id = 'angle'
+    param_bounds = np.array(ssms.config.model_config['angle']['param_bounds'])
+    
 
     InputFile_name = "InputFile_{}.csv".format(criterion)
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
     InputParameters = pd.read_csv(InputFile_path, delimiter = ',')
     if InputParameters.shape[1] == 1: InputParameters = pd.read_csv(InputFile_path, delimiter = ';')	# depending on how you save the csv-file, the delimiter should be "," or ";". - This if-statement ensures that the correct delimiter is used. 
     InputDictionary = InputParameters.to_dict()
-
-    for row in range(InputParameters.shape[0]):
+#%% start PA loop
+    for row in range(InputParameters.shape[0]): 
         #Calculate how long it takes to do a power estimation
         start_time = datetime.now()
         print("Power estimation started at {}.".format(start_time))
 
         #Extract all values that are the same regardless of the criterion used
         ntrials = InputDictionary['ntrials'][row]
-        nreversals = InputDictionary['nreversals'][row]
-        reward_probability = InputDictionary['reward_probability'][row]
-        nreps = InputDictionary['nreps'][row]
+        nreps = InputDictionary['nreps'][row]                                                                                                                                        
         full_speed = InputDictionary['full_speed'][row]
         output_folder = InputDictionary['output_folder'][row]
-        
-        variables_fine = check_input_parameters(ntrials, nreversals, reward_probability, full_speed, criterion, output_folder)
-        if variables_fine == 0: quit()
+# =============================================================================
+#         # experiment setting, not for DDM
+#         nreversals = InputDictionary['nreversals'][row]
+#         reward_probability = InputDictionary['reward_probability'][row]
+#         
+# =============================================================================
+
+         
+# =============================================================================
+#         # check parameters
+#         variables_fine = check_input_parameters(ntrials, nreversals, reward_probability, full_speed, criterion, output_folder)
+#         if variables_fine == 0: quit()
+# =============================================================================
         
         #if not os.path.isdir(output_folder): 
         #    print('output_folder does not exist, please adapt the csv-file')
         #    quit()
-
+#%% IC init
+# switch critierion
         if criterion == "IC":
             npp = InputDictionary['npp'][row]
-            meanLR, sdLR = InputDictionary['meanLR'][row], InputDictionary['sdLR'][row]
-            meanInverseT, sdInverseT = InputDictionary['meanInverseTemperature'][row], InputDictionary['sdInverseTemperature'][row]
             tau = InputDictionary['tau'][row]
-            s_pooled = sdLR
+            
+# =============================================================================
+#             # distribution of parameters
+#             meanLR, sdLR = InputDictionary['meanLR'][row], InputDictionary['sdLR'][row]
+#             meanInverseT, sdInverseT = InputDictionary['meanInverseTemperature'][row], InputDictionary['sdInverseTemperature'][row]
 
+# =============================================================================
+            means = []
+            stds = []
+            for DtbName, DtbValues in InputDictionary.items():
+                if ("mean" in DtbName):
+                    means.append(DtbValues[row])
+                if ("std" in DtbName):
+                    stds.append(DtbValues[row])
+            means = np.array(means)    
+            stds = np.array(stds) 
+#%% power analysis (working)
             output, power_estimate = power_estimation_Incorrelation(npp = npp, ntrials = ntrials, nreps = nreps,
-                                                                  cut_off = tau,
-                                               high_performance = full_speed, nreversals = nreversals,
-                                               reward_probability = reward_probability, mean_LRdistribution = meanLR,
-                                               SD_LRdistribution = sdLR, mean_inverseTempdistribution = meanInverseT,
-                                               SD_inverseTempdistribution = sdInverseT)
-            output.to_csv(os.path.join(output_folder, 'OutputIC{}SD{}T{}R{}N{}M.csv'.format(s_pooled, ntrials,
-                                                                                      nreversals,
+                                                                  cut_off = tau,high_performance = full_speed, 
+                                                                  means = means, stds=stds,
+                                                                  param_bounds = param_bounds,
+                                                                  DDM_id = DDM_id)
+            output.to_csv(os.path.join(output_folder, 'OutputIC{}T{}N{}M.csv'.format(ntrials,
                                                                                       npp, nreps)))
+#%%                
+            
             if HPC == False:
                 fig, axes = plt.subplots(nrows = 1, ncols = 1)
                 sns.kdeplot(output["correlations"], label = "Correlations", ax = axes)
                 fig.suptitle("Pr(Correlation >= {}) \nwith {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
                 axes.set_title("Power = {}% \nbased on {} reps".format(np.round(power_estimate*100, 2), nreps))
                 axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
-
+#%%
         elif criterion == "GD":
             npp_pergroup = InputDictionary['npp_group'][row]
             npp = npp_pergroup*2
