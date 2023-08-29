@@ -1,2 +1,2 @@
-ntrials,nreversals,npp,mean_v,mean_a,mean_z,mean_t,mean_theta,std_v,std_a,std_z,std_t,thetstd_a,tau,nreps,full_speed,output_folder
-450,25,150,0,1.6,0.5,1,0.6,2,1,0.3,0.3,0.4,0.5,250,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DLC/Compass_results
+model,ntrials,npp,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,tau,nreps,full_speed,output_folder
+ddm,40,80,0,1.4,0.5,1,2,0.7,0.3,0.3,0.5,30,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test/
