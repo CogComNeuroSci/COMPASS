@@ -1,4 +1,8 @@
-ntrials,nreversals,npp_group,meanLR_g1,sdLR_g1,meanLR_g2,sdLR_g2,meanInverseTemperature_g1,sdInverseTemperature_g1,meanInverseTemperature_g2,sdInverseTemperature_g2,reward_probability,TypeIerror,nreps,full_speed,output_folder
-100,5,20,0.5,0.25,0.75,0.25,1.5,0.5,1.5,0.5,0.8,0.05,250,1,/Users/pieter/Documents/Compass_tutorial
-500,25,20,0.5,0.25,0.75,0.25,1.5,0.5,1.5,0.5,0.8,0.05,250,1,/Users/pieter/Documents/Compass_tutorial
-500,25,50,0.5,0.25,0.75,0.25,1.5,0.5,1.5,0.5,0.8,0.05,250,1,/Users/pieter/Documents/Compass_tutorial
+,ntrials,nreversals,npp_group,meanLR_g1,sdLR_g1,meanLR_g2,sdLR_g2,meanInverseTemperature_g1,sdInverseTemperature_g1,meanInverseTemperature_g2,sdInverseTemperature_g2,reward_probability,TypeIerror,nreps,full_speed,output_folder
+,100,5,20,0.5,0.25,0.75,0.25,1.5,0.5,1.5,0.5,0.8,0.05,250,1,/Users/pieter/Documents/Compass_tutorial
+,500,25,20,0.5,0.25,0.75,0.25,1.5,0.5,1.5,0.5,0.8,0.05,250,1,/Users/pieter/Documents/Compass_tutorial
+,500,25,50,0.5,0.25,0.75,0.25,1.5,0.5,1.5,0.5,0.8,0.05,250,1,/Users/pieter/Documents/Compass_tutorial
+,,,,,,,,,,,,,,,,
+group,model,ntrials,npp,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,tau,nreps,full_speed,output_folder,
+1,ddm,40,40,0,1.4,0.5,1,2,0.7,0.3,0.3,0.5,30,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test/,
+2,,,,,,,,,,,,,,,,

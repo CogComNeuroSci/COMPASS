@@ -1,0 +1,42 @@
+{
+    "os": "Windows-10-10.0.22621-SP0",
+    "python": "3.9.7",
+    "heartbeatAt": "2023-06-26T09:07:11.959827",
+    "startedAt": "2023-06-26T09:07:11.870924",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "D:\\horiz\\IMPORTANT\\0study_graduate\\Pro_COMPASS\\COMPASS_DLC\\test.py",
+    "codePath": "test.py",
+    "git": {
+        "remote": "https://github.com/heeluning/COMPASS_DLC.git",
+        "commit": "f7a174c19e2a133a1678b9b865cb0a64c84a1589"
+    },
+    "email": "heeluning@163.com",
+    "root": "D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DLC",
+    "host": "HLN_laptop",
+    "username": "horiz",
+    "executable": "C:\\ProgramData\\Anaconda3\\envs\\pyPower\\python.exe",
+    "cpu_count": 12,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2500.0,
+        "min": 0.0,
+        "max": 2500.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2500.0,
+            "min": 0.0,
+            "max": 2500.0
+        }
+    ],
+    "disk": {
+        "total": 274.71483993530273,
+        "used": 113.10488891601562
+    },
+    "memory": {
+        "total": 15.731925964355469
+    }
+}
