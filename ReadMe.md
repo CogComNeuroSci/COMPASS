@@ -26,8 +26,8 @@ internal_correlation: correlation between sampled and estimated parameter values
 ###  1.Define the distributions from which true parameters are sampled
 
 To make it suitable for real behavioral data, parameters sampled to compute power should generate performance similar to real participants. Performance heatmaps of different combinations of parameters are plotted helping to choose ranges of true parameters.
-Here mean ACC and mean RT of one participant are used as measure of performance. 
-For one choice, ACC is defined by the sign of drift parameter and the sign of that choice. For example, if the option denoted by -1 is chosen and the drift parameter is also a negative value, then it is a correct choice. If the drift parameter equals to zero, the parameters will be resampled.
+
+Here mean ACC and mean RT of one participant are used as measure of performance. For one choice, ACC is defined by the sign of drift parameter and the sign of that choice. For example, if the option denoted by -1 is chosen and the drift parameter is also a negative value, then it is a correct choice. If the drift parameter equals to zero, the parameters will be resampled.
 
 A participant as well as its true parameter can be accepted only when the mean ACC is within 50% to 95% AND mean RT is within 0 to 10 s.
 
@@ -44,14 +44,15 @@ HOW TO DO: set "parameter_recovery = 1" in the "test.py" and run the file
 You can specify multiple rows in your input file.
 
 For IC criterion, open InputFile_IC.csv and specify:
+  
   model: string, the DDM model of interest. model must be included by ssms package.
   ntrials: integer, the number of trials
   npp: integer, the number of participants
   mean_{}: float, means of parameters corresponding to the model type
-    ! NOTE !: the ORDER of parameters must be the same as they are ordered in the ssms package.
-    ! NOTE !: to see the order of parameters, use: ssms.config.model_config[model]['params']
+    NOTE: the ORDER of parameters must be the same as they are ordered in the ssms package.
+    NOTE: to see the order of parameters, use: ssms.config.model_config[model]['params']
   std_{}: float, stds of parameters corresponding to the model type
-    ! NOTE !: the ORDER of stds must correspond to the means
+    NOTE: the ORDER of stds must correspond to the means
   tau: float 𝜖 [0, 1] the value against which the obtained statistic will be compared to define significance of the repetition
   nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
   full_speed: integer (0 or 1) Define whether you want to do the power analysis at full speed.
@@ -67,11 +68,10 @@ Run the PowerAnalysis.py script using the correct Anaconda 3 environment.
 If one followed the Installation guide above, a PyPower environment has been created.
 
 To use this environment:
-
   Open Anaconda prompt
   Now, run: conda activate pyPower
+  
 To run COMPASS:
-
   Go to the directory where the COMPASS files are stored using cd
   Now, run: python PowerAnalysis.py IC, python PowerAnalysis.py EC or python PowerAnalysis.py GD depending on the criterion that you want to use.
 
@@ -81,9 +81,9 @@ To run COMPASS:
 After computing power on multiple combinations of npp and ntrials, you can get a power heatmap to choose the optimal design of your research.
 
 HOW TO DO: 
-  1. Specify the following variables of results in plot.py
+  1. Specify the following variables of results in plot.py :
 
-    ResultPath： string, the path you gather results of power analysis
+    ResultPath：string, the path you gather results of power analysis
     DDM_id: string, correspond to the model in the input file, e.g., "ddm"
     tau: float, correspond to the tau in the input file
     nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
@@ -91,7 +91,6 @@ HOW TO DO:
     range_npp: list, list of trials of interest
     p_list: list, list of parameters
 
-    e.g. ResultPath = "results\\test3"
   2. Set "plot_heatmap = 1"
   3. Run the file
 
