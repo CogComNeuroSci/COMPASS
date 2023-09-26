@@ -31,7 +31,7 @@ warnings.filterwarnings('ignore')
 
 #%% DDM functions
 def power_estimation_Incorrelation(npp = 30, ntrials = 480, cut_off = 0.7, high_performance = False, nreps = 100, 
-                                   means = None, stds = None, DDM_id = 'angle',param_bounds = None,method = "Brute"):
+                                   means = None, stds = None, DDM_id = 'angle',param_bounds = None,method = "Nelder-Mead"):
     
     
     """
@@ -42,24 +42,18 @@ def power_estimation_Incorrelation(npp = 30, ntrials = 480, cut_off = 0.7, high_
         Number of participants in the study.
     ntrials : integer
         Number of trials that will be used to do the parameter recovery analysis for each participant.
-    nreversals : integer
-        The number of rule-reversals that will occur in the experiment. Should be smaller than ntrials.
     cut_off : float
         Critical value that will be used to evaluate whether the repetition was successful.
     high_performance : bool (True or False)
         Defines whether multiple cores on the computer will be used in order to estimate the power.
     nreps : integer
         Number of repetitions that will be used for the parameter estimation process.
-    reward_probability : float (element within [0, 1]), optional
-        The probability that reward will be congruent with the current stimulus-response mapping rule. The default is 0.8.
-    mean_LRdistribution: float
-        Mean for the normal distribution to sample learning rates from.
-    SD_LRdistribution: float
-        Standard deviation for the normal distribution to sample learning rates from.
-    mean_inverseTempdistribution: float
-        Mean for the normal distribution to sample inverse temperatures from.
-    SD_inverseTempdistribution: float
-        Standard deviation for the normal distribution to sample inverse temperatures from.
+    means: 
+    stds:
+    DDM_id: 
+    param_bounds:
+    method:
+
 
     Returns
     -------
@@ -89,9 +83,13 @@ def power_estimation_Incorrelation(npp = 30, ntrials = 480, cut_off = 0.7, high_
 #                                      npp = 150, 
 #                                      ntrials = 450, DDM_id = "angle", rep=1, nreps = 250, ncpu = 6):
 # =============================================================================
+    print("Start IC analysis")
+    print("Optimization Method:",method)
 
+    param_bounds = np.array(ssms.config.model_config[DDM_id]['param_bounds'])
+    
 
-    out = pool.starmap(Incorrelation_repetition, [(means,stds, param_bounds, 
+    out_AllReturns = pool.starmap(Incorrelation_repetition, [(means,stds, param_bounds, 
                                                    npp, ntrials,DDM_id,method,
                                                    rep, nreps, n_cpu) for rep in range(nreps)])
 
@@ -103,6 +101,8 @@ def power_estimation_Incorrelation(npp = 30, ntrials = 480, cut_off = 0.7, high_
     
     pool.close()
     pool.join()
+
+    out = [IC_Sta[0] for IC_Sta in out_AllReturns]
 
     allreps_output = pd.DataFrame(np.array(out).reshape(nreps,len(means)),columns=ssms.config.model_config[DDM_id]['params'])
     power_estimate = pd.DataFrame(np.empty((1,len(means))),columns=ssms.config.model_config[DDM_id]['params'])
@@ -211,12 +211,7 @@ if __name__ == '__main__':
 #%%               
             
             if HPC == False:
-                for  p in :
-                    fig, axes = plt.subplots(nrows = 1, ncols = 1)
-                    sns.kdeplot(output[p], label = p, ax = axes)
-                    fig.suptitle("Pr(T-statistic > {}) \nconsidering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
-                    axes.set_title("Power = {}% \nbased on {} reps with Cohen's d = {}".format(np.round(power_estimate*100, 2), nreps, np.round(cohens_d,2)))
-                    axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+                print('plot codes moved to plot.file')
 
 
 #%%
@@ -284,14 +279,15 @@ if __name__ == '__main__':
         else: print("Criterion not found")
         #final adaptations to the output figure & store the figure
         if HPC == False:
-            fig.legend(loc = 'center right')
-            fig.tight_layout()
-            fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M{}.jpg'.format(criterion,
-                                                                                    np.round(s_pooled, 2),
-                                                                                    ntrials, nreversals,
-                                                                                    npp, nreps)))
+            print('plot codes removed')
+        #     fig.legend(loc = 'center right')
+        #     fig.tight_layout()
+        #     fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M{}.jpg'.format(criterion,
+        #                                                                             np.round(s_pooled, 2),
+        #                                                                             ntrials, nreversals,
+        #                                                                             npp, nreps)))
 
-        # measure how long the power estimation lasted
+        # # measure how long the power estimation lasted
         end_time = datetime.now()
         print("\nPower analysis ended at {}; run lasted {} hours.".format(end_time, end_time-start_time))
 

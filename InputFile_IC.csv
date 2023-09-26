@@ -1,2 +1,10 @@
 model,ntrials,npp,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,tau,nreps,full_speed,output_folder
-ddm,40,80,0,1.4,0.5,1,2,0.7,0.3,0.3,0.5,30,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test/
+ddm,20,20,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,40,20,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,60,20,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,20,40,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,40,40,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,60,40,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,20,60,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,40,60,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/
+ddm,60,60,0,1.18,0.5,0.5,0.3,0.33,0.1,0.25,0.8,20,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test3/

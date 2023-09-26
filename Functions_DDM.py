@@ -8,6 +8,7 @@ import ssms
 import numpy as np
 import pandas as pd
 import os, time
+import math
 from scipy import optimize
 from scipy import stats as stat
 import matplotlib.pyplot as plt
@@ -30,19 +31,7 @@ def Incorrelation_repetition(means,stds ,
 
     Parameters
     ----------
-    inverseTemp_distribution : numpy array, shape = (2,)
-        Defines the mean & standard deviation of the normal distribution that will be used to draw the true inverse Temperature values from for each hypothetical participant.
-        Mean of the distribution = inverseTemp_distribution[0], standard deviation of the distribution = inverseTemp_distribution[1]
-    LR_distribution : numpy array, shape = (2,)
-        Defines the mean & standard deviation of the normal distribution that will be used to draw the true learning rate values from for each hypothetical participant.
-        Mean of the distribution = LR_distribution[0], standard deviation of the distribution = LR_distribution[1].
-    npp : integer
-        Number of participants that will be used in the parameter recovery analysis.
-    ntrials : integer
-        Number of trials that will be used to do the parameter recovery analysis for each participant.
-    start_design : numpy array, shape = (ntrials X 5)
-        Design that will be used to simulate data for this repetition and to estimate the parameters as well.
-        For more details on this design see function create_design()
+
     rep : integer
         Which repetition of the power estimation process is being executed.
     nreps: integer
@@ -85,33 +74,72 @@ def Incorrelation_repetition(means,stds ,
 
     ####PART 1: parameter generation for all participants####
     # Define the True params that will be used for each pp in this rep
-    True_Par =  generate_parameters(means = means, stds = stds, 
-                                    param_bounds = param_bounds, npp = npp)
+
+    # True_Par =  generate_parameters(means = means, stds = stds, 
+    #                                 param_bounds = param_bounds, npp = npp)
+    # True_Par.columns = ssms.config.model_config[DDM_id]['params']
+
+    True_Par = pd.DataFrame(np.empty((npp,len(means))))
     True_Par.columns = ssms.config.model_config[DDM_id]['params']
 
-    estimation_results = np.empty((npp,len(means)))
+    Esti_Par = pd.DataFrame(np.empty((npp,len(means))))
+    Esti_Par.columns = ssms.config.model_config[DDM_id]['params']
+
+    ACC_out = np.empty((npp,1))
+    RT_out = np.empty((npp,1))
+
+    waste_counter = 0
+
+   ###########################################
+   #          RESCALE THE RANGE OF A         #
+   ###########################################
+    param_bounds_Opti = param_bounds
+    param_bounds_Opti[:,1] = param_bounds[:,1]*2 
+
+
     for pp in range(npp): # loop for participants
-        # print('Participant No.',pp)
+        ACC = 0
         ####Part 2: Data simulation for this participant####
+        while ACC <= 0.50 or ACC >= 0.95 or RT >= 10:
         # generate the responses for this participant
-        responses = simulate_responses(np.array(True_Par.loc[pp]),DDM_id,ntrials)
-        responses = np.array(responses['rts'] * responses['choices'])
-        
+
+            One_True_Par = generate_parameters(means = means, stds = stds, 
+                                     param_bounds = param_bounds, npp = 1)
+
+
+
+            responses = simulate_responses(np.array(One_True_Par),DDM_id,ntrials)
+            responses = np.array(responses['rts'] * responses['choices'])
+            # validation of parameters
+            
+            ACC = np.mean( responses*One_True_Par.iloc[0,0] > 0)            
+            RT = np.mean(np.abs(responses))
+            
+            if ACC <= 0.50 or ACC >= 0.95 or RT >= 10: 
+                waste_counter = waste_counter+1
+         
+
+        True_Par.iloc[pp,:] = np.array(One_True_Par)
+        ACC_out[pp] = ACC
+        RT_out[pp] = RT
+
         ####Part 3: parameter estimation for this participant####
         fun = neg_likelihood
         arg = (responses,DDM_id)
          # method = "Nelder-Mead"  or method=="Brute"
-        estimation_results[pp] = MLE(fun,arg,param_bounds,method,show = 1)          
-        
-        # print(estimation_results[pp],neg_likelihood(estimation_results[pp],arg)) 
+        # re-scaling parameter a
+        Esti_Par.iloc[pp,:] = MLE(fun,arg,param_bounds_Opti,method,show = 0)     
+
+        # print(Esti_Par[pp],neg_likelihood(Esti_Par[pp],arg)) 
         # print(np.array(True_Par.loc[pp]),neg_likelihood(True_Par.loc[pp],arg))
 
-    
+
+    Esti_Par['a'] = Esti_Par['a']/2
     ####Part 4: correlation between true & estimated learning rates####
     # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
     Statistic = np.empty((1,len(means)))
     for p in range(len(means)):
-        Statistic[0,p] = np.round(np.corrcoef(True_Par.iloc[:,p], estimation_results[:,p])[0,1], 3)
+        Statistic[0,p] = np.round(np.corrcoef(True_Par.iloc[:,p], Esti_Par.iloc[:,p])[0,1], 3)
         print("Statistic:",Statistic[0,p])
 
  
@@ -121,12 +149,12 @@ def Incorrelation_repetition(means,stds ,
         estimated_time = np.ceil(estimated_seconds / 60)
         print("\nThe power analysis will take ca. {} minutes".format(estimated_time))
     # return proportion_failed_estimates, Statistic
-    return Statistic
+    
+    return Statistic,True_Par,Esti_Par, ACC_out, RT_out
 
 
-def generate_parameters(means = np.array([0,1.6,0.5,1,0.6]),stds = np.array([2,1,0.3,0.3,0.4]), 
-                        param_bounds = np.array([[-3.0,  3.0,  1.0,  1.0, -1.0],
-                                                 [ 3.0,  3.0,  9.0,  2.0,  1.3]]), 
+def generate_parameters(means,stds , 
+                        param_bounds , 
                         npp = 150, multivariate = False, corr = False):
     """
     Parameters
