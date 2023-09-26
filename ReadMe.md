@@ -45,20 +45,20 @@ You can specify multiple rows in your input file.
 
 For IC criterion, open InputFile_IC.csv and specify:
   
-  model: string, the DDM model of interest. model must be included by ssms package.
-  ntrials: integer, the number of trials
-  npp: integer, the number of participants
-  mean_{}: float, means of parameters corresponding to the model type
+  * model: string, the DDM model of interest. model must be included by ssms package.
+  * ntrials: integer, the number of trials
+  * npp: integer, the number of participants
+  * mean_{}: float, means of parameters corresponding to the model type
     NOTE: the ORDER of parameters must be the same as they are ordered in the ssms package.
     NOTE: to see the order of parameters, use: ssms.config.model_config[model]['params']
-  std_{}: float, stds of parameters corresponding to the model type
+  * std_{}: float, stds of parameters corresponding to the model type
     NOTE: the ORDER of stds must correspond to the means
-  tau: float 𝜖 [0, 1] the value against which the obtained statistic will be compared to define significance of the repetition
-  nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
-  full_speed: integer (0 or 1) Define whether you want to do the power analysis at full speed.
+  * tau: float 𝜖 [0, 1] the value against which the obtained statistic will be compared to define significance of the repetition
+  * nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
+  * full_speed: integer (0 or 1) Define whether you want to do the power analysis at full speed.
     0 = only one core will be used (slow)
     1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
-  output_folder: string, path to the folder where the output-figure(s) will be stored
+  * output_folder: string, path to the folder where the output-figure(s) will be stored
       
 
 ### 4. Run power computations for DDM
@@ -77,29 +77,29 @@ To run COMPASS:
 
 ### 5. Check the output in the shell & the stored figure(s) in the output_folder
 
-1. Power heatmap
+#### Power heatmap
+
 After computing power on multiple combinations of npp and ntrials, you can get a power heatmap to choose the optimal design of your research.
 
 HOW TO DO: 
-  1. Specify the following variables of results in plot.py :
+1. Specify the following variables of results in plot.py
+* ResultPath：string, the path you gather results of power analysis
+* DDM_id: string, correspond to the model in the input file, e.g., "ddm"
+* tau: float, correspond to the tau in the input file
+* nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
+* range_ntrials: list, list of trials of interest
+* range_npp: list, list of trials of interest
+* p_list: list, list of parameters
 
-    ResultPath：string, the path you gather results of power analysis
-    DDM_id: string, correspond to the model in the input file, e.g., "ddm"
-    tau: float, correspond to the tau in the input file
-    nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
-    range_ntrials: list, list of trials of interest
-    range_npp: list, list of trials of interest
-    p_list: list, list of parameters
+2. Set "plot_heatmap = 1"
+3. Run the file
 
-  2. Set "plot_heatmap = 1"
-  3. Run the file
-
-2. Distribution of statistics of one computation 
+#### Distribution of statistics of one computation 
 
 HOW TO DO:
-  1. Specify the "range_ntrials" and "range_npp" as the setting of computation of interest in plot.py
-    e.g.,
-      range_ntrials = [60]
-      range_npp = [20]
-  2. Set "plot_single_setting = 1"
-  3. Run the file
+1. Specify the "range_ntrials" and "range_npp" as the setting of computation of interest in plot.py
+   e.g.,
+     range_ntrials = [60]
+     range_npp = [20]
+2. Set "plot_single_setting = 1"
+3. Run the file
