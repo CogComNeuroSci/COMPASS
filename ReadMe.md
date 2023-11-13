@@ -1,7 +1,7 @@
 [![Uni](https://img.shields.io/badge/University-Ghent%20University-brightgreen)](https://img.shields.io/badge/University-Ghent%20University-brightgreen)
 [![Date](https://img.shields.io/badge/Last%20update-2023-yellow)](https://img.shields.io/badge/Last%20update-2023-yellow)
 
-# COmputational Power Analysis using Simulations "COMPASS" toolbox on DDM
+# Computational Power Analysis using Simulations "COMPASS" toolbox on DDM
 
 Expanding COMPASS toolbox to DDM models.
 
@@ -14,92 +14,61 @@ For more details, see: https://github.com/AlexanderFengler/ssm-simulators
 
 Similar to the original COMPASS, COMPASS DDM follows these steps:
 
-1. Sample true parameters from the distributions you defined within the parameter bounds defined in ssms package.
+1. Sample true parameters from the distributions defined by a .csv input file, with ranges defined in ssms package.
 2. Generate behavioral data by the true parameters sampled. Behavioral data includes both choices (denoted by 1 or -1) and reaction times.
 3. Validate performance of generated behavioral data. If performance exceeds normal range, then go back to step 1
-4. Estimate the best fitting parameters for each participant given the simulated data.
-5. Compute statistics.
-internal_correlation: correlation between sampled and estimated parameter values.
-6. Evaluate which proportion of statistics reached the cut-off value.
+   Performance validation:
+    A participant as well as its true parameter can be accepted only when the mean ACC is within 50% to 95% AND mean RT is within 0 to 10 s.
+    Here mean ACC and mean RT of one participant are used as measure of performance. For one choice, ACC is defined by the sign of drift parameter and the sign of that choice. For example, if the option denoted by -1 is chosen and the drift parameter is also a negative value, then it is a correct choice. If the drift parameter equals to zero, the parameters will be resampled.
+5. Estimate the best fitting parameters for each participant given the simulated behavioral data.
+6. Compute statistics on one sample and compare to the cut-off. Statistics including:
+  Internal_correlation: correlation coefficients between sampled and estimated parameter values.
+  External_correlation: correlation coefficients between an external measurement (which is assumed to be Gaussian distributed) and estimated parameter values.
+  Groupdifference: t-values measuring a group difference between estimated parameters of two groups
+7. Repeat sampling and evaluate the proportion of statistics reached the cut-off value
 
 ## Steps to compute power of DDM
 ###  1.Define the distributions from which true parameters are sampled
+Creat a csv file, with name of "InputFile_IC_DDM", "InputFile_EC_DDM", or "InputFile_GD_DDM" corresponding to each criterion.
 
-To make it suitable for real behavioral data, parameters sampled to compute power should generate performance similar to real participants. Performance heatmaps of different combinations of parameters are plotted helping to choose ranges of true parameters.
+For IC criterion, you should define:
+  model: index of DDM model which should be matched with ssms package
+  ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
+  npp: integer, number of participants in the study.
+  “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
+  “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
+  tau: the cut-off value of correlation coef
+  nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
+  full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
+  output_folder: path to save results
 
-Here mean ACC and mean RT of one participant are used as measure of performance. For one choice, ACC is defined by the sign of drift parameter and the sign of that choice. For example, if the option denoted by -1 is chosen and the drift parameter is also a negative value, then it is a correct choice. If the drift parameter equals to zero, the parameters will be resampled.
+For EC criterion, you should define:
+  model: index of DDM model which should be matched with ssms package
+  ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
+  npp: integer, number of participants in the study.
+  “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
+  “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
+  par_ind: parameter index of the parameter of interest, according to the order from ssms. START FROM 0. E.g., par_ind = 0, corresponding to "v"
+  True_correlation: the hypothesized correlation between the learning rate and the external measure theta.   
+  TypeIerror: critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
+  nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
+  full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
+  output_folder: path to save results
 
-A participant as well as its true parameter can be accepted only when the mean ACC is within 50% to 95% AND mean RT is within 0 to 10 s.
+For GD criterion, you should define:
+  model: index of DDM model which should be matched with ssms package
+  ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
+  npp: integer, number of participants in the study.
+  “mean_{}”s: means of true parameter distribution. There should be TWO values separated by COMMA in the cell corresponding to the parameter you want to compare. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
+  “std_{}”s: stds of true parameter distribution. There should be TWO values separated by COMMA in the cell corresponding to the parameter you want to compare. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: stds_v, stds_a, stds_z, stds_t
+  par_ind: parameter index of the parameter of interest, according to the order from ssms. START FROM 0. E.g., par_ind = 0, corresponding to "v"
+  True_correlation: the hypothesized correlation between the learning rate and the external measure theta.   
+  TypeIerror: critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
+  nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
+  full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
 
-HOW TO DO: set "parameter_range = 1" in the "test.py" and run the file 
+### 2. run COMPASS
+1. Open Anaconda prompt, type:conda activate pyPower
+2. run: python PowerAnalysis.py IC_DDM, python PowerAnalysis.py GD_DDM, python PowerAnalysis.py EC_DDM depending on the criterion that you want to use.
 
-### 2. try parameter recovery on one participant
 
-Before computing power analysis on large size of samples, let's start from recovering parameters on one participant.
-
-HOW TO DO: set "parameter_recovery = 1" in the "test.py" and run the file 
-
-### 3. set input file for power analysis
-
-You can specify multiple rows in your input file.
-
-For IC criterion, open InputFile_IC.csv and specify:
-  
-  * model: string, the DDM model of interest. model must be included by ssms package.
-  * ntrials: integer, the number of trials
-  * npp: integer, the number of participants
-  * mean_{}: float, means of parameters corresponding to the model type
-    NOTE: the ORDER of parameters must be the same as they are ordered in the ssms package.
-    NOTE: to see the order of parameters, use: ssms.config.model_config[model]['params']
-  * std_{}: float, stds of parameters corresponding to the model type
-    NOTE: the ORDER of stds must correspond to the means
-  * tau: float 𝜖 [0, 1] the value against which the obtained statistic will be compared to define significance of the repetition
-  * nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
-  * full_speed: integer (0 or 1) Define whether you want to do the power analysis at full speed.
-    0 = only one core will be used (slow)
-    1 = (all-2) cores will be used (much faster, recommended unless you need your computer for other intensive tasks such as meetings)
-  * output_folder: string, path to the folder where the output-figure(s) will be stored
-      
-
-### 4. Run power computations for DDM
-
-Run the PowerAnalysis.py script using the correct Anaconda 3 environment.
-
-If one followed the Installation guide above, a PyPower environment has been created.
-
-To use this environment:
-  Open Anaconda prompt
-  Now, run: conda activate pyPower
-  
-To run COMPASS:
-  Go to the directory where the COMPASS files are stored using cd
-  Now, run: python PowerAnalysis.py IC, python PowerAnalysis.py EC or python PowerAnalysis.py GD depending on the criterion that you want to use.
-
-### 5. Check the output in the shell & the stored figure(s) in the output_folder
-
-#### Power heatmap
-
-After computing power on multiple combinations of npp and ntrials, you can get a power heatmap to choose the optimal design of your research.
-
-HOW TO DO: 
-1. Specify the following variables of results in plot.py
-* ResultPath：string, the path you gather results of power analysis
-* DDM_id: string, correspond to the model in the input file, e.g., "ddm"
-* tau: float, correspond to the tau in the input file
-* nreps: integer 𝜖 [1, +∞] Number of repetitions that will be conducted to estimate the power
-* range_ntrials: list, list of trials of interest
-* range_npp: list, list of trials of interest
-* p_list: list, list of parameters
-
-2. Set "plot_heatmap = 1"
-3. Run the file
-
-#### Distribution of statistics of one computation 
-
-HOW TO DO:
-1. Specify the "range_ntrials" and "range_npp" as the setting of computation of interest in plot.py
-   e.g.,
-     range_ntrials = [60]
-     range_npp = [20]
-2. Set "plot_single_setting = 1"
-3. Run the file
