@@ -32,8 +32,8 @@ Similar to the original COMPASS, COMPASS DDM follows these steps:
 Creat a csv file, with name of "InputFile_IC_DDM", "InputFile_EC_DDM", or "InputFile_GD_DDM" corresponding to each criterion.
 
 For IC criterion, you should define:
-  model: index of DDM model which should be matched with ssms package
-  ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
+  * model: index of DDM model which should be matched with ssms package
+  * ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
   npp: integer, number of participants in the study.
   “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
   “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
