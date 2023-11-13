@@ -34,38 +34,38 @@ Creat a csv file, with name of "InputFile_IC_DDM", "InputFile_EC_DDM", or "Input
 For IC criterion, you should define:
   * model: index of DDM model which should be matched with ssms package
   * ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
-  npp: integer, number of participants in the study.
-  “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
-  “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
-  tau: the cut-off value of correlation coef
-  nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
-  full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
-  output_folder: path to save results
+  * npp: integer, number of participants in the study.
+  * “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
+  * “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
+  * tau: the cut-off value of correlation coef
+  * nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
+  * full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
+  * output_folder: path to save results
 
 For EC criterion, you should define:
-  model: index of DDM model which should be matched with ssms package
-  ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
-  npp: integer, number of participants in the study.
-  “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
-  “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
-  par_ind: parameter index of the parameter of interest, according to the order from ssms. START FROM 0. E.g., par_ind = 0, corresponding to "v"
-  True_correlation: the hypothesized correlation between the learning rate and the external measure theta.   
-  TypeIerror: critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
-  nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
-  full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
-  output_folder: path to save results
+  * model: index of DDM model which should be matched with ssms package
+  * ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
+  * npp: integer, number of participants in the study.
+  * “mean_{}”s: means of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
+  * “std_{}”s: stds of true parameter distribution. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: std_v, std_a, std_z, std_t
+  * par_ind: parameter index of the parameter of interest, according to the order from ssms. START FROM 0. E.g., par_ind = 0, corresponding to "v"
+  * True_correlation: the hypothesized correlation between the learning rate and the external measure theta.   
+  * TypeIerror: critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
+  * nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
+  * full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
+  * output_folder: path to save results
 
 For GD criterion, you should define:
-  model: index of DDM model which should be matched with ssms package
-  ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
-  npp: integer, number of participants in the study.
-  “mean_{}”s: means of true parameter distribution. There should be TWO values separated by COMMA in the cell corresponding to the parameter you want to compare. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
-  “std_{}”s: stds of true parameter distribution. There should be TWO values separated by COMMA in the cell corresponding to the parameter you want to compare. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: stds_v, stds_a, stds_z, stds_t
-  par_ind: parameter index of the parameter of interest, according to the order from ssms. START FROM 0. E.g., par_ind = 0, corresponding to "v"
-  True_correlation: the hypothesized correlation between the learning rate and the external measure theta.   
-  TypeIerror: critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
-  nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
-  full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
+  * model: index of DDM model which should be matched with ssms package
+  * ntrials: number of trials that will be used to do the parameter recovery analysis for each participant.
+  * npp: integer, number of participants in the study.
+  * “mean_{}”s: means of true parameter distribution. There should be TWO values separated by COMMA in the cell corresponding to the parameter you want to compare. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: mean_v, mean_a, mean_z, mean_t
+  * “std_{}”s: stds of true parameter distribution. There should be TWO values separated by COMMA in the cell corresponding to the parameter you want to compare. The order of parameters MUST BE MATCH with that in ssms. e.g., for ddm model, the order must be: stds_v, stds_a, stds_z, stds_t
+  * par_ind: parameter index of the parameter of interest, according to the order from ssms. START FROM 0. E.g., par_ind = 0, corresponding to "v"
+  * True_correlation: the hypothesized correlation between the learning rate and the external measure theta.   
+  * TypeIerror: critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
+  * nreps: number of samples to calculate proportion(probability) of which statistics exceed cut-off value
+  * full_speed: defines whether multiple cores on the computer will be used in order to estimate the power.
 
 ### 2. run COMPASS
 1. Open Anaconda prompt, type:conda activate pyPower
