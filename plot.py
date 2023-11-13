@@ -5,17 +5,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import ssms
-sys.path.append(r"D:\horiz\IMPORTANT\0study_graduate\Pro_COMPASS\COMPASS_DDM\results\test3")
-ResultPath = "results\\test3"
-plot_single_setting = 0
-plot_heatmap = 1
+# sys.path.append(r"D:\horiz\IMPORTANT\0study_graduate\Pro_COMPASS\COMPASS_DDM\results\test3")
 
+plot_heatmap = 0
+plot_single_setting = 1
+
+ResultPath = "results\\test3"
 DDM_id = "ddm"
 tau = 0.8
 nreps = 20
-range_ntrials = [20,40,60]
-range_npp = [20,40,60]
-
+range_ntrials = [60]
+range_npp = [20]
 p_list = ['v','a','z','t']
 
 heatmap_v = np.zeros((len(range_ntrials),len(range_npp)))
@@ -67,53 +67,53 @@ Power_AllData = (heatmap_v,heatmap_a,heatmap_z,heatmap_t)
 
 
 # plot heat map    
+if plot_heatmap:
+    fontsize = 20
+    fig, axs = plt.subplots(1,len(p_list), 
+                            gridspec_kw={
+                                'width_ratios': [1, 1,1,1.25]
+                                # 'height_ratios': [1, 1,1,1]
+                                })
 
-fontsize = 20
-fig, axs = plt.subplots(1,len(p_list), 
-                        gridspec_kw={
-                            'width_ratios': [1, 1,1,1.25]
-                            # 'height_ratios': [1, 1,1,1]
-                            })
+    fig.suptitle("Pr(internal correlation >= {}) with Nreps = {}".format(tau,nreps), fontsize=fontsize)
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
+    sns.set(font_scale=1.4)
+    def plot_MultiHeatmap(ax_fi,fi,fi_range,data,norm,title,xticklabels,yticklabels,xylabels, t = 0.5):
+        y_visible = False
+        colbar = False
+        if fi == fi_range[0]:
+            y_visible = True
+        if fi == fi_range[1]:
+            colbar = True
+        
+        ax=sns.heatmap(data,
+                        xticklabels=xticklabels,
+                        yticklabels=yticklabels,
+                        annot=True,
+                        ax = ax_fi,
+                        cbar=colbar, 
+                        cmap = 'Blues',
+                        norm=norm
+                    )
+        
+        ax.set_title(title, fontsize=18)
+        ax.set_xlabel(xylabels[0])  # x轴标题
+        ax.set_ylabel(xylabels[1])
+        ax.axes.yaxis.set_visible(y_visible)
+        ax.invert_yaxis()
+        figure = ax.get_figure()
+        return figure
 
-fig.suptitle("Pr(internal correlation >= {}) with Nreps = {}".format(tau,nreps), fontsize=fontsize)
-norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
-sns.set(font_scale=1.4)
-def plot_MultiHeatmap(ax_fi,fi,fi_range,data,norm,title,xticklabels,yticklabels,xylabels, t = 0.5):
-    y_visible = False
-    colbar = False
-    if fi == fi_range[0]:
-        y_visible = True
-    if fi == fi_range[1]:
-        colbar = True
-    
-    ax=sns.heatmap(data,
-                    xticklabels=xticklabels,
-                    yticklabels=yticklabels,
-                    annot=True,
-                    ax = ax_fi,
-                    cbar=colbar, 
-                    cmap = 'Blues',
-                    norm=norm
-                )
-    
-    ax.set_title(title, fontsize=18)
-    ax.set_xlabel(xylabels[0])  # x轴标题
-    ax.set_ylabel(xylabels[1])
-    ax.axes.yaxis.set_visible(y_visible)
-    ax.invert_yaxis()
-    figure = ax.get_figure()
-    return figure
-
-for i_p in range(len(p_list)):
-
-
-        data=pd.DataFrame(Power_AllData[i_p])
-        power_plot = plot_MultiHeatmap(axs[i_p],i_p,[0,len(p_list)-1],data,title = "power of parameter {}".format(p_list[i_p]),
-                                       norm = norm,
-                        xticklabels = range_npp,yticklabels = range_ntrials,
-                        xylabels = ['participants','trials'], t = 0.5)
+    for i_p in range(len(p_list)):
 
 
+            data=pd.DataFrame(Power_AllData[i_p])
+            power_plot = plot_MultiHeatmap(axs[i_p],i_p,[0,len(p_list)-1],data,title = "power of parameter {}".format(p_list[i_p]),
+                                        norm = norm,
+                            xticklabels = range_npp,yticklabels = range_ntrials,
+                            xylabels = ['participants','trials'], t = 0.5)
 
-plt.show()
+
+
+    plt.show()
 

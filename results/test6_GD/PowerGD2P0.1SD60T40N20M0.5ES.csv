@@ -1,0 +1,6 @@
+,z,tau,true_pValue,conventional_power,model,ntrials,npp_group,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,par_ind,TypeIerror,nreps,full_speed,output_folder
+0,0.45,1.9908470685550523,0.0011152499837778773,0.8776149151293248,,,,,,,,,,,,,,,,
+0,,,,,ddm,60.0,40.0,0.0,1.18,"0.5,0.55",0.5,0.3,0.33,"0.1,0.1",0.25,2.0,0.05,20.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test6_GD/
+1,,,,,ddm,20.0,60.0,0.0,1.18,"0.5,0.55",0.5,0.3,0.33,"0.1,0.1",0.25,2.0,0.05,20.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test6_GD/
+2,,,,,ddm,40.0,60.0,0.0,1.18,"0.5,0.55",0.5,0.3,0.33,"0.1,0.1",0.25,2.0,0.05,20.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test6_GD/
+3,,,,,ddm,60.0,60.0,0.0,1.18,"0.5,0.55",0.5,0.3,0.33,"0.1,0.1",0.25,2.0,0.05,20.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test6_GD/
