@@ -165,7 +165,7 @@ def Incorrelation_repetition_DDM(means,stds ,
             The statistic that is calculated here is correlation(true learning rates, recovered learning rates).
     If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (the internal correlation criterion) in a single study.
     """
-    print("Sample:",rep,"/",nreps)
+
     if rep == 0:
         t0 = time.time()
 
@@ -235,7 +235,7 @@ def Incorrelation_repetition_DDM(means,stds ,
     Statistic = np.empty((1,len(means)))
     for p in range(len(means)):
         Statistic[0,p] = np.round(np.corrcoef(True_Par.iloc[:,p], Esti_Par.iloc[:,p])[0,1], 3)
-        print("Statistic:",Statistic[0,p])
+        print("Sample: {}/{}, Statistic of parameter {}: r = {}".format(rep,nreps,ssms.config.model_config[DDM_id]['params'][p],Statistic[0,p]))
 
  
     if rep == 0:
@@ -305,7 +305,7 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
             The statistic that is calculated here is correlation(measure, recovered learning rates).
     If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (the external correlation criterion) in a single study.
     """
-    print("Sample:",rep,"/",nreps)
+   
     if rep == 0:
         t0 = time.time()
 
@@ -376,7 +376,7 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
     Esti_r = Stat[0]
     Esti_pValue = Stat[1]
 
-    print('sampel: {}, estimated r = {:.3f}, p = {:.3f}, true r = {:.3f}, p = {:.3f}'.format(rep,Esti_r,Esti_pValue,True_r,True_pValue))
+    print('sampel: {}/{}, statistics: r = {:.3f}, p = {:.3f}'.format(rep,nreps,Esti_r,Esti_pValue))
 
     if rep == 0:
         t1 = time.time() - t0
@@ -445,7 +445,6 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
             The statistic that is calculated here is the p-value associated with the T-statistic which is obtained by a two-sample t-test comparing the recovered LRs for group 0 with the recovered LRs for group 1.
     If this function is repeated a number of times and the value of the Statistic is stored each time, we can evaluate later on the power or probability to meet the proposed parameter recovery criterion (group difference criterion) in a single study.
     """
-    print("Sample:",rep,"/",nreps)
     if rep == 0:
         t0 = time.time()
 
@@ -525,7 +524,7 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
     # because alternative = less does not exist in scipy version 1.4.0, yet we want a one-sided test
     pValue = pValue/2 
 
-    print('sampel: {}, statistics: t = {:.3f}, p = {:.3f}'.format(rep,Statistic,pValue))
+    print('sampel: {}/{}, statistics: t = {:.3f}, p = {:.3f}'.format(rep,nreps,Statistic,pValue))
 
     if rep == 0:
         t1 = time.time() - t0

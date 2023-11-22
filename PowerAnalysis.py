@@ -9,7 +9,6 @@ import os,sys
 # os.chdir('D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM')
 
 #%%
-PLOT = 1
 HPC = False
 # import matplotlib
 # import matplotlib.pyplot as plt
@@ -91,7 +90,7 @@ def power_estimation_Incorrelation_DDM(means = None, stds=None, DDM_id = "ddm",
     print("Optimization Method:",method)
 
     param_bounds = np.array(ssms.config.model_config[DDM_id]['param_bounds'])
-    
+
     out_AllReturns = pool.starmap(Incorrelation_repetition_DDM, [(means,stds, param_bounds, 
                                                    npp, ntrials,DDM_id,method,
                                                    rep, nreps, n_cpu) for rep in range(nreps)])
@@ -180,9 +179,9 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
     noncentral_beta = stat.beta((npp/2)-1, (npp/2)-1, loc = -1+True_correlation, scale = 2)
     conventional_power = 1-noncentral_beta.cdf(tau)
 
+    print(str("\nProbability to obtain a significant correlation under conventional power implementation: {}%".format(np.round(conventional_power*100,2))))
     print(str("\nThe correlation cut-off value is: {}".format(np.round(tau,2))))
     print(str("\np-value for true correlation is :{}".format(np.round(true_pValue,5))))
-    print(str("\nProbability to obtain a significant correlation under conventional power implementation: {}%".format(np.round(conventional_power*100,2))))
 
     #divide process over multiple cores
     pool = Pool(processes = n_cpu)
@@ -213,7 +212,7 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
 
 
     return allreps_output, power_estimate
-def power_estimation_groupdifference_DDM(means_g1,means_g2,stds_g1,stds_g2,DDM_id, par_ind,
+def power_estimation_groupdifference_DDM(cohens_d, means_g1,means_g2,stds_g1,stds_g2,DDM_id, par_ind,
                                         npp_per_group = 40, ntrials = 100,
                                         nreps = 250, typeIerror = 0.05, high_performance = 1):
 
@@ -270,10 +269,10 @@ def power_estimation_groupdifference_DDM(means_g1,means_g2,stds_g1,stds_g2,DDM_i
         #Compute conventional power
         conventional_power = 1-stat.nct.cdf(tau, (npp_per_group-1)*2, cohens_d*np.sqrt(npp_per_group))
 
-        print(str("\nThe t-distribution cut-off value is: {}".format(np.round(tau,2))))
-        print(str("\np-value for given cohen's d is :{}".format(np.round(true_pValue,5))))
         print("\nProbability to obtain a significant group difference under conventional power implementation: {}%".format(np.round(conventional_power*100,2)))
-
+        print(str("\nEstimated effect size d = : {}".format(np.round(cohens_d,3))))
+        print(str("\nThe t-distribution cut-off value is: {}".format(np.round(tau,3))))
+        print(str("\np-value for given cohen's d is :{}".format(np.round(true_pValue,5))))
         #divide process over multiple cores
 
         pool = Pool(processes = n_cpu)
@@ -336,10 +335,12 @@ def GetMeansStd(InputDictionary):
 if __name__ == '__main__':
 
     criterion = sys.argv[1:]
+    if not criterion:
+        criterion = ["GD_DDM"]
     assert len(criterion) == 1
-
-    # criterion = ['GD_DDM']
+    criterion = criterion[0]
     # criterion = criterion[0]
+    
    
     InputFile_name = "InputFile_{}.csv".format(criterion)
     InputFile_path = os.path.join(os.getcwd(), InputFile_name)
@@ -356,11 +357,9 @@ if __name__ == '__main__':
         print("Power estimation started at {}.".format(start_time))
 
         #Extract all values that are the same regardless of the criterion used
-        npp = int(InputDictionary['npp'][row])
-        ntrials = InputDictionary['ntrials'][row]
-        nreps = int(InputDictionary['nreps'][row])    
-        range_npp.append(npp)     
-        range_ntrials.append(ntrials)                                                                                                                                   
+        
+        ntrials =  int(InputDictionary['ntrials'][row])
+        nreps = int(InputDictionary['nreps'][row])                                                                                                                               
         full_speed = InputDictionary['full_speed'][row]
         output_folder = InputDictionary['output_folder'][row]
      
@@ -376,16 +375,12 @@ if __name__ == '__main__':
             sys.exit(0)
 # IC 
         if criterion == "IC_DDM":
-            
+            npp = int(InputDictionary['npp'][row])
             tau = InputDictionary['tau'][row]
-# =============================================================================
-#             # define DDM models in ssms 
-#             to see included models: list(ssms.config.model_config.keys())[:10]
-# =============================================================================    
             DDM_id = InputDictionary['model'][row]
             means,stds = GetMeansStd(InputDictionary)
 
-    #% power analysis 
+
             print("\nStart IC analysis for DDM model\n")
             print("model: {}".format(DDM_id))
             print("trials: {}".format(ntrials))
@@ -393,14 +388,31 @@ if __name__ == '__main__':
             print("tau: {}".format(tau))
             output, power_estimate = power_estimation_Incorrelation_DDM(means = means, stds=stds, DDM_id = DDM_id,
                                                                         npp = npp, ntrials = ntrials, nreps = nreps,
-                                                                  cut_off = tau, high_performance = full_speed)
+                                                                        cut_off = tau, high_performance = full_speed)
             
             output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(output_folder, 'OutputIC{}T{}N{}M.csv'.format(ntrials,
-                                                                                      npp, nreps)))
+            output.to_csv(os.path.join(output_folder, 'OutputIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)))
             power_estimate = pd.concat([power_estimate,InputParameters])
-            power_estimate.to_csv(os.path.join(output_folder, 'PowerIC{}T{}N{}M.csv'.format(ntrials,
-                                                                                      npp, nreps)))
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)))
+            if HPC == False:
+                Parameters = ssms.config.model_config[DDM_id]["params"]
+                for p in Parameters :
+                    plt.tight_layout() 
+                    fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(8, 8))
+                    # sns.set_theme(style = "white",font_scale=1.4)
+                    sns.kdeplot(output[p].dropna(axis = 0), ax = axes)
+                    fig.suptitle("Pr(Correlation >= {}) with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold',fontsize = 25)
+
+                    power_value = power_estimate[p].dropna(axis = 0).values[0]
+                    axes.set_title("Power = {}% based on {} reps".format(np.round(power_value*100, 2), nreps),fontsize = 25)
+                    axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+                    axes.tick_params(labelsize=20)
+                    axes.set_xlabel('Correlations of '+p,fontsize = 20)
+                    axes.set_ylabel('Density',fontsize = 20)
+
+                    file_name = 'PowerIC{}T{}N{}M_{}.png'.format(ntrials,npp,nreps,p)
+                    plt.savefig(output_folder+file_name,bbox_inches='tight')
+                    plt.show(block=False) 
 # EC
         elif criterion == "EC_DDM":
             npp = InputDictionary['npp'][row]
@@ -433,7 +445,34 @@ if __name__ == '__main__':
             
             power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
             power_estimate.to_csv(os.path.join(output_folder, 'PowerEC{}P{}SD{}TC{}T{}N{}M.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
-                                                                                      npp, nreps)))       
+                                                                                      npp, nreps)))     
+            plt.show(block=False) 
+            if HPC == False:
+
+                # sns.kdeplot(output["Statistic"], label = "Correlation", ax = axes)
+                # fig.suptitle("Pr(Correlation > {}) \nconsidering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp, ntrials), fontweight = 'bold')
+                # axes.set_title("Power = {}% \nbased on {} reps with true correlation {}".format(np.round(power_estimate*100, 2), nreps, True_correlation))
+                # axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+            
+                plt.tight_layout() 
+                p_n = ssms.config.model_config[DDM_id]['params'][par_ind]
+                fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(8, 8))
+                # sns.set_theme(style = "white",font_scale=1.4)
+                sns.kdeplot(output["Esti_r"].dropna(axis = 0),label = "Correlation", ax = axes)
+                fig.suptitle("Pr(Correlation > {}) considering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp, ntrials), fontweight = 'bold',fontsize = 25)
+                power_value = power_estimate[p_n].dropna(axis = 0).values[0]
+
+                axes.set_title("Power = {} % based on {} reps with true correlation {}".format(np.round(power_value*100, 2), nreps, True_correlation),fontsize = 25)
+                axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+                axes.tick_params(labelsize=20)
+                axes.set_xlabel('Correlations of '+ p_n, fontsize = 20)
+                axes.set_ylabel('Density',fontsize = 20)
+                file_name = 'PowerEC{}P{}SD{}TC{}T{}N{}M.png'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps)
+                plt.savefig(output_folder+file_name,bbox_inches='tight') 
+                plt.show(block=False) 
+
+ 
 # DG
         elif criterion == "GD_DDM":
             npp_pergroup = InputDictionary['npp_group'][row]
@@ -454,6 +493,7 @@ if __name__ == '__main__':
                     print("Check the distribution and index of parameter you want to compare")
                     sys.exit(0)
                 else:
+
                     ms_g = raw_DistributionPar[NotCompare_ind].astype(float)
                     ms_g = np.insert(ms_g, par_ind, Compare_ms_g)
                     return ms_g
@@ -470,7 +510,16 @@ if __name__ == '__main__':
             s_pooled = np.sqrt((stds_g1[par_ind]**2 + stds_g2[par_ind]**2) / 2)
             cohens_d = np.abs(means_g1[par_ind]-means_g2[par_ind])/s_pooled
 
-            output, power_estimate = power_estimation_groupdifference_DDM(means_g1,means_g2,stds_g1,stds_g2,DDM_id, par_ind,
+
+            print("\nStart GD analysis for DDM model\n")
+            print("model: {}".format(DDM_id))
+            print("trials: {}".format(ntrials))
+            print("participants: {}".format(npp))
+            print("parameter index: {}".format(par_ind))
+            print("Means of group 1: {}, stds of group 1: {}".format(means_g1,stds_g1))
+            print("Means of group 2: {}, stds of group 2: {}".format(means_g2,stds_g2))
+
+            output, power_estimate = power_estimation_groupdifference_DDM(cohens_d,means_g1,means_g2,stds_g1,stds_g2,DDM_id, par_ind,
                                                                       npp_per_group = npp_pergroup, ntrials = ntrials,
                                                                       nreps = nreps, typeIerror = typeIerror, high_performance = full_speed)
 
@@ -481,124 +530,34 @@ if __name__ == '__main__':
             power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
             power_estimate.to_csv(os.path.join(output_folder, 'PowerGD{}P{}SD{}T{}N{}M{}ES.csv'.format(par_ind,np.round(s_pooled,2),ntrials,
                                                                                       npp_pergroup, nreps,np.round(cohens_d,2))))
+            if HPC == False:
+
+                # fig, axes = plt.subplots(nrows = 1, ncols = 1)
+                # sns.kdeplot(output["Statistic"], label = "T-statistic", ax = axes)
+                # fig.suptitle("Pr(T-statistic > {}) \nconsidering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
+                # axes.set_title("Power = {}% \nbased on {} reps with Cohen's d = {}".format(np.round(power_estimate*100, 2), nreps, np.round(cohens_d,2)))
+                # axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+
+                plt.tight_layout() 
+                p_n = ssms.config.model_config[DDM_id]['params'][par_ind]
+                fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(10, 10))
+                # sns.set_theme(style = "white",font_scale=1.4)
+                sns.kdeplot(output["Statistic"].dropna(axis = 0),label = "Correlation", ax = axes)
+                fig.suptitle("Pr(T-statistic > {}) considering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp_pergroup, ntrials), fontweight = 'bold',fontsize = 25)
+                power_value = power_estimate[p_n].dropna(axis = 0).values[0]
+                axes.set_title("Power = {} % based on {} reps with Cohen's d = {}".format(np.round(power_value*100, 2), nreps, np.round(cohens_d,2)),fontsize = 25)
+                axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
+                axes.tick_params(labelsize=20)
+                axes.set_xlabel('T-statistics of '+ p_n, fontsize = 20)
+                axes.set_ylabel('Density',fontsize = 20)
+
+                file_name = 'PowerGD{}P{}SD{}T{}N{}M{}ES.png'.format(par_ind,np.round(s_pooled,2),ntrials,
+                                                                                      npp_pergroup, nreps,np.round(cohens_d,2))
+                plt.savefig(output_folder+file_name,bbox_inches='tight')  
+                plt.show(block=False) 
 
         else: print("Criterion not found")
         # # measure how long the power estimation lasted
         end_time = datetime.now()
         print("\nPower analysis ended at {}; run lasted {} hours.".format(end_time, end_time-start_time))
     
-    # plot
-    if PLOT == True:
-        print('plot')
-
-        if criterion == "IC_DDM":
-            DDM_id = "ddm"
-            # tau = 0.8
-            # nreps = 20
-            # range_ntrials = [60]
-            # range_npp = [20]
-            p_list = ssms.config.model_config[DDM_id]
-            ResultPath = output_folder
-            heatmap_v = np.zeros((len(range_ntrials),len(range_npp)))
-            heatmap_a =  np.zeros((len(range_ntrials),len(range_npp)))
-            heatmap_z =  np.zeros((len(range_ntrials),len(range_npp)))
-            heatmap_t =  np.zeros((len(range_ntrials),len(range_npp)))
-
-            for n_t in range(len(range_ntrials)):
-                for n_p in range(len(range_npp)):
-                    ntrials = range_ntrials[n_t]
-                    npp = range_npp[n_p]
-
-                    Parameters = ssms.config.model_config[DDM_id]["params"]
-                    OutputFile_name = 'OutputIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)
-                    OutputFile_path = os.path.join(os.getcwd(), ResultPath, OutputFile_name)
-                    OutputResults = pd.read_csv(OutputFile_path, delimiter = ',')
-
-                    PowerFile_name = 'PowerIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)
-                    PowerFile_path = os.path.join(os.getcwd(), ResultPath, PowerFile_name)
-                    PowerResults = pd.read_csv(PowerFile_path, delimiter = ',')[Parameters].dropna(axis = 0)
-            heatmap_v[n_t,n_p] = PowerResults['v'][0]
-            heatmap_a[n_t,n_p] = PowerResults['a'][0]
-            heatmap_z[n_t,n_p] = PowerResults['z'][0]
-            heatmap_t[n_t,n_p] = PowerResults['t'][0]
-            
-            Power_AllData = (heatmap_v,heatmap_a,heatmap_z,heatmap_t)
-            fontsize = 20
-            fig, axs = plt.subplots(1,len(p_list), 
-                                gridspec_kw={
-                                    'width_ratios': [1, 1,1,1.25]
-                                    # 'height_ratios': [1, 1,1,1]
-                                    })
-
-            fig.suptitle("Pr(internal correlation >= {}) with Nreps = {}".format(tau,nreps), fontsize=fontsize)
-            norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
-            sns.set(font_scale=1.4)
-            def plot_MultiHeatmap(ax_fi,fi,fi_range,data,norm,title,xticklabels,yticklabels,xylabels, t = 0.5):
-                y_visible = False
-                colbar = False
-                if fi == fi_range[0]:
-                    y_visible = True
-                if fi == fi_range[1]:
-                    colbar = True
-                
-                ax=sns.heatmap(data,
-                                xticklabels=xticklabels,
-                                yticklabels=yticklabels,
-                                annot=True,
-                                ax = ax_fi,
-                                cbar=colbar, 
-                                cmap = 'Blues',
-                                norm=norm
-                            )
-                
-                ax.set_title(title, fontsize=18)
-                ax.set_xlabel(xylabels[0])  # x轴标题
-                ax.set_ylabel(xylabels[1])
-                ax.axes.yaxis.set_visible(y_visible)
-                ax.invert_yaxis()
-                figure = ax.get_figure()
-                return figure
-
-                for i_p in range(len(p_list)):
-                    data=pd.DataFrame(Power_AllData[i_p])
-                    power_plot = plot_MultiHeatmap(axs[i_p],i_p,[0,len(p_list)-1],data,title = "power of parameter {}".format(p_list[i_p]),
-                                                norm = norm,
-                                    xticklabels = range_npp,yticklabels = range_ntrials,
-                                    xylabels = ['participants','trials'], t = 0.5)
-
-
-
-                plt.show()
-        # tau = OutputResults['tau'].values[-1]
-        # if plot_single_setting:
-        #     for p in Parameters :
-                
-        #             fig, axes = plt.subplots(nrows = 1, ncols = 1)
-        #             sns.set_theme(style = "white",font_scale=1.4)
-        #             sns.kdeplot(OutputResults[p].dropna(axis = 0), ax = axes)
-        #             fig.suptitle("Pr(Correlation >= {}) with {} pp, {} trials)".format(tau, npp, ntrials), fontweight = 'bold')
-
-        #             power_estimate = PowerResults[p].values
-        #             axes.set_title("Power = {} based on {} reps".format(np.round(power_estimate*100, 2), nreps))
-        #             axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
-        #             axes.tick_params(labelsize=20)
-        #             axes.set_xlabel('Correlations of '+p,fontsize = 20)
-        #             axes.set_ylabel('Density',fontsize = 20)
-
-        #             plt.show()
-
-            
-
-
-        #     fig.legend(loc = 'center right')
-        #     fig.tight_layout()
-        #     fig.savefig(os.path.join(output_folder, 'Plot{}{}T{}R{}N{}M{}.jpg'.format(criterion,
-        #                                                                             np.round(s_pooled, 2),
-        #                                                                             ntrials, nreversals,
-        #                                                                             npp, nreps)))
-
-
-
-
-
-

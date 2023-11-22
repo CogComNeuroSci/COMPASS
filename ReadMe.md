@@ -69,7 +69,7 @@ For GD criterion, you should define:
 
 ### 2. run COMPASS
 1. Open Anaconda prompt, type:conda activate pyPower
-2. run: python PowerAnalysis.py IC_DDM, python PowerAnalysis.py GD_DDM, python PowerAnalysis.py EC_DDM depending on the criterion that you want to use.
+2. Run PowerAnalysis.py with criterion as input: python PowerAnalysis.py IC_DDM, python PowerAnalysis.py GD_DDM, python PowerAnalysis.py EC_DDM depending on the criterion that you want to use.
 
 
 
