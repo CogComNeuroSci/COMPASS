@@ -9,7 +9,7 @@ import os,sys
 # os.chdir('D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM')
 
 #%%
-HPC = False
+HPC = True
 # import matplotlib
 # import matplotlib.pyplot as plt
 import numpy as np
