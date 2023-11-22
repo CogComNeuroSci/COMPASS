@@ -336,7 +336,7 @@ if __name__ == '__main__':
 
     criterion = sys.argv[1:]
     if not criterion:
-        criterion = ["GD_DDM"]
+        criterion = [""]
     assert len(criterion) == 1
     criterion = criterion[0]
     # criterion = criterion[0]
@@ -456,7 +456,7 @@ if __name__ == '__main__':
             
                 plt.tight_layout() 
                 p_n = ssms.config.model_config[DDM_id]['params'][par_ind]
-                fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(8, 8))
+                fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(10,10))
                 # sns.set_theme(style = "white",font_scale=1.4)
                 sns.kdeplot(output["Esti_r"].dropna(axis = 0),label = "Correlation", ax = axes)
                 fig.suptitle("Pr(Correlation > {}) considering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp, ntrials), fontweight = 'bold',fontsize = 25)
