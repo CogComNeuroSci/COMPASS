@@ -11,6 +11,24 @@ from wfpt_n.wfpt_n import wiener_like_n
 import numpy as np
 
 def neg_likelihood(param,arg):
+    """
+    neg_likelihood(param,arg):
+    ----------
+    theta : 1 * n array， n: number of parameters 
+        parameters in an array to generate responses from ssms package.
+    arg: tuple
+        arg[0]: DDM_id, string, should match those from the SSMS package.
+        arg[1]: data, array, behavioral data to estimate parameters, which is denoted by responses['rts'] * responses['choices']
+
+    Returns
+    -------
+    -llh : float
+        negative log-likelihood of generate the given data with provided parameters.
+
+    Description
+    -----------
+    Function to generate negative log-likelihood for estimate parameters of ddm models.
+    """
     err = 10 ** (-10)
     data = arg[0]
     DDM_id = arg[1]

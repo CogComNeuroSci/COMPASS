@@ -9,7 +9,7 @@ import os,sys
 # os.chdir('D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM')
 
 #%%
-HPC = True
+HPC = 0
 # import matplotlib
 # import matplotlib.pyplot as plt
 import numpy as np
@@ -107,8 +107,8 @@ def power_estimation_Incorrelation_DDM(means = None, stds=None, DDM_id = "ddm",
 
     out = [IC_Sta[0] for IC_Sta in out_AllReturns]
     True_out = [IC_Sta[1] for IC_Sta in out_AllReturns]
-
-    allreps_output = pd.DataFrame(np.array(out).reshape(nreps,len(means)),columns=ssms.config.model_config[DDM_id]['params'])
+    cn = ssms.config.model_config[DDM_id]['params']+["ACC","RT"]
+    allreps_output = pd.DataFrame(np.array(out).reshape(nreps,len(means)+2),columns=cn)
     power_estimate = pd.DataFrame(np.empty((1,len(means))),columns=ssms.config.model_config[DDM_id]['params'])
    
     for p in range(len(means)):
@@ -195,13 +195,13 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
     pool.close()
     pool.join()
 
-    allreps_output = pd.DataFrame(out, columns = ['Esti_r', 'Esti_pValue', 'True_r', 'True_pValue'])
+    allreps_output = pd.DataFrame(out, columns = ['Esti_r', 'Esti_pValue', 'True_r', 'True_pValue',"ACC", "RT"])
 
     #Compute power if estimates would be perfect.
 
     #Compute power for correlation with estimated parameter values.
     
-    power_estimate =  pd.DataFrame(np.empty((1,4)), columns=[ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
+    power_estimate =  pd.DataFrame(np.empty((1,4)), columns=["power_"+ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
     power_estimate.iloc[0,0] = np.mean((allreps_output['Esti_pValue'] <= typeIerror/2)*1)
     power_estimate.iloc[0]['tau'] = tau
     power_estimate.iloc[0]['true_pValue'] = true_pValue
@@ -283,11 +283,11 @@ def power_estimation_groupdifference_DDM(cohens_d, means_g1,means_g2,stds_g1,std
         pool.close()
         pool.join()
 
-        allreps_output = pd.DataFrame(out, columns = ['Statistic', 'PValue'])
+        allreps_output = pd.DataFrame(out, columns = ['Statistic', 'PValue','ACC_g1','ACC_g2','RT_g1','RT_g2'])
 
         # check for which % of repetitions the group difference was significant
         # note that we're working with a one-sided t-test (if interested in two-sided need to divide the p-value obtained at each rep with 2)
-        power_estimate =  pd.DataFrame(np.empty((1,4)), columns=[ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
+        power_estimate =  pd.DataFrame(np.empty((1,4)), columns=["power_"+ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
         power_estimate.iloc[0,0] = np.mean((allreps_output['PValue'] <= typeIerror/2))
         power_estimate.iloc[0]['tau'] = tau
         power_estimate.iloc[0]['true_pValue'] = true_pValue
@@ -336,7 +336,7 @@ if __name__ == '__main__':
 
     criterion = sys.argv[1:]
     if not criterion:
-        criterion = [""]
+        criterion = ["IC_DDM"]
     assert len(criterion) == 1
     criterion = criterion[0]
     # criterion = criterion[0]
@@ -390,10 +390,12 @@ if __name__ == '__main__':
                                                                         npp = npp, ntrials = ntrials, nreps = nreps,
                                                                         cut_off = tau, high_performance = full_speed)
             
-            output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(output_folder, 'OutputIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)))
-            power_estimate = pd.concat([power_estimate,InputParameters])
-            power_estimate.to_csv(os.path.join(output_folder, 'PowerIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)))
+            # output = pd.concat([output,InputParameters])
+            time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            InputParameters.to_csv(os.path.join(output_folder, 'InputIC{}T{}N{}M_{}.csv'.format(ntrials,npp, nreps, time)))
+            output.to_csv(os.path.join(output_folder, 'OutputIC{}T{}N{}M_{}.csv'.format(ntrials,npp, nreps,time)))
+            # power_estimate = pd.concat([power_estimate,InputParameters])
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerIC{}T{}N{}M_{}.csv'.format(ntrials,npp, nreps,time)))
             if HPC == False:
                 Parameters = ssms.config.model_config[DDM_id]["params"]
                 for p in Parameters :
@@ -410,7 +412,7 @@ if __name__ == '__main__':
                     axes.set_xlabel('Correlations of '+p,fontsize = 20)
                     axes.set_ylabel('Density',fontsize = 20)
 
-                    file_name = 'PowerIC{}T{}N{}M_{}.png'.format(ntrials,npp,nreps,p)
+                    file_name = 'PowerIC{}T{}N{}M_{}_{}.png'.format(ntrials,npp,nreps,p,time)
                     plt.savefig(output_folder+file_name,bbox_inches='tight')
                     plt.show(block=False) 
 # EC
@@ -439,14 +441,17 @@ if __name__ == '__main__':
                                                                         True_correlation,npp, ntrials, nreps,
                                                                         typeIerror, high_performance = True, ncpu = 6)
             
-            output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(output_folder, 'OutputEC{}P{}SD{}TC{}T{}N{}M.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
-                                                                                      npp, nreps)))
+            # output = pd.concat([output,InputParameters])
+            time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            InputParameters.to_csv(os.path.join(output_folder, 'InputEC{}P{}SD{}TC{}T{}N{}M_{}.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)))           
+            output.to_csv(os.path.join(output_folder, 'OutputEC{}P{}SD{}TC{}T{}N{}M_{}.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)))
             
-            power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
-            power_estimate.to_csv(os.path.join(output_folder, 'PowerEC{}P{}SD{}TC{}T{}N{}M.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
-                                                                                      npp, nreps)))     
-            plt.show(block=False) 
+            # power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerEC{}P{}SD{}TC{}T{}N{}M_{}.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)))     
+            
             if HPC == False:
 
                 # sns.kdeplot(output["Statistic"], label = "Correlation", ax = axes)
@@ -455,7 +460,7 @@ if __name__ == '__main__':
                 # axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
             
                 plt.tight_layout() 
-                p_n = ssms.config.model_config[DDM_id]['params'][par_ind]
+                p_n = "power_"+ssms.config.model_config[DDM_id]['params'][par_ind]
                 fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(10,10))
                 # sns.set_theme(style = "white",font_scale=1.4)
                 sns.kdeplot(output["Esti_r"].dropna(axis = 0),label = "Correlation", ax = axes)
@@ -467,8 +472,8 @@ if __name__ == '__main__':
                 axes.tick_params(labelsize=20)
                 axes.set_xlabel('Correlations of '+ p_n, fontsize = 20)
                 axes.set_ylabel('Density',fontsize = 20)
-                file_name = 'PowerEC{}P{}SD{}TC{}T{}N{}M.png'.format(par_ind,s_pooled, True_correlation, ntrials,
-                                                                                      npp, nreps)
+                file_name = 'PowerEC{}P{}SD{}TC{}T{}N{}M_{}.png'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)
                 plt.savefig(output_folder+file_name,bbox_inches='tight') 
                 plt.show(block=False) 
 
@@ -524,12 +529,15 @@ if __name__ == '__main__':
                                                                       nreps = nreps, typeIerror = typeIerror, high_performance = full_speed)
 
 
-            output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(output_folder, 'OutputGD{}P{}SD{}T{}N{}M{}ES.csv'.format(par_ind,np.round(s_pooled,2),
-                                                                                                ntrials,npp_pergroup, nreps, np.round(cohens_d,2))))
-            power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
-            power_estimate.to_csv(os.path.join(output_folder, 'PowerGD{}P{}SD{}T{}N{}M{}ES.csv'.format(par_ind,np.round(s_pooled,2),ntrials,
-                                                                                      npp_pergroup, nreps,np.round(cohens_d,2))))
+            # output = pd.concat([output,InputParameters])
+            time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            InputParameters.to_csv(os.path.join(output_folder, 'InputGD{}P{}SD{}T{}N{}M{}ES_{}.csv'.format(par_ind,np.round(s_pooled,2),
+                                                                                                ntrials,npp_pergroup, nreps, np.round(cohens_d,2),time)))
+            output.to_csv(os.path.join(output_folder, 'OutputGD{}P{}SD{}T{}N{}M{}ES_{}.csv'.format(par_ind,np.round(s_pooled,2),
+                                                                                                ntrials,npp_pergroup, nreps, np.round(cohens_d,2),time)))
+            # power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerGD{}P{}SD{}T{}N{}M{}_{}ES.csv'.format(par_ind,np.round(s_pooled,2),ntrials,
+                                                                                      npp_pergroup, nreps,np.round(cohens_d,2),time)))
             if HPC == False:
 
                 # fig, axes = plt.subplots(nrows = 1, ncols = 1)
@@ -538,8 +546,8 @@ if __name__ == '__main__':
                 # axes.set_title("Power = {}% \nbased on {} reps with Cohen's d = {}".format(np.round(power_estimate*100, 2), nreps, np.round(cohens_d,2)))
                 # axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
 
-                plt.tight_layout() 
-                p_n = ssms.config.model_config[DDM_id]['params'][par_ind]
+                # plt.tight_layout() 
+                p_n = "power_"+ssms.config.model_config[DDM_id]['params'][par_ind]
                 fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(10, 10))
                 # sns.set_theme(style = "white",font_scale=1.4)
                 sns.kdeplot(output["Statistic"].dropna(axis = 0),label = "Correlation", ax = axes)
@@ -551,10 +559,11 @@ if __name__ == '__main__':
                 axes.set_xlabel('T-statistics of '+ p_n, fontsize = 20)
                 axes.set_ylabel('Density',fontsize = 20)
 
-                file_name = 'PowerGD{}P{}SD{}T{}N{}M{}ES.png'.format(par_ind,np.round(s_pooled,2),ntrials,
-                                                                                      npp_pergroup, nreps,np.round(cohens_d,2))
+                file_name = 'PowerGD{}P{}SD{}T{}N{}M{}ES_{}.png'.format(par_ind,np.round(s_pooled,2),ntrials,
+                                                                                      npp_pergroup, nreps,np.round(cohens_d,2),time)
+                
                 plt.savefig(output_folder+file_name,bbox_inches='tight')  
-                plt.show(block=False) 
+                # plt.show() 
 
         else: print("Criterion not found")
         # # measure how long the power estimation lasted

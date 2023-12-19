@@ -9,6 +9,35 @@ from scipy import optimize
 import numpy as np
 
 def MLE(fun,arg,param_bounds,method, show = 0):
+    """
+
+    Parameters
+    ----------
+    fun: function
+        Negative log-likelihood function to be minimized
+    arg: tuple
+        Arg to fun, including (responses,DDM_id)
+    param_bounds: 2 * n array
+        range of parameters, the 0th row corresponds to lower bound, the 1st corresponds to upper bound
+    method: str
+        Algorithm for optimizing, including "Nelder-Mead" and "Brute"
+    show: bool
+        Whether show initial guesses, start points, end points in "Nelder-Mead" method
+    
+    Returns
+    -------
+    estimated_parameters : array, shape = (number of parameters)
+        estimated parameters given behavioral responses
+
+    Description
+    -------
+    This function minimize the negative log-likelihood fucntion to estimated parameters that generate a given behavioral data.
+    Optimization can be accomplished by two methods:
+    "Brute": using gird research in the parameter range to estimate parameters
+    "Nelder-Mead": this method loops for 10 * num_par times to get different initial guesses, then select the parameter set with minimum negative log-likelihood as return
+
+    
+    """
     ranges = ()
     for p in range(param_bounds.shape[1]) :
         ranges = ranges+(tuple(param_bounds.T[p]),)

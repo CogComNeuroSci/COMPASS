@@ -2,20 +2,67 @@ import os,sys
 import pandas as pd
 import seaborn as sns
 import matplotlib
+from scipy import stats
 import matplotlib.pyplot as plt
 import numpy as np
 import ssms
+def ImPlot_plot(title,x,xlabel,y,ylabel,type = "plot",titlesize=35,xylabelsize=25,labelsize = 25,linewidth = 5):
+    # corr_coef = np.corrcoef(x, y)[0, 1]
+    # coefficients = np.polyfit(x, y, 1)  # 线性回归，拟合一次多项式（一次直线）
+    # poly = np.poly1d(coefficients)
+    # x_fit = np.linspace(min(x), max(x))  # 创建拟合线的 x 值
+    # y_fit = poly(x_fit) 
+
+    plt.figure(figsize=(12, 12))
+    plt.title(title,fontdict={"fontsize" : titlesize})
+    if type == "plot":
+        plt.plot(x,y,linewidth=linewidth)
+    elif type == "scatter":
+        plt.scatter(x,y,s=linewidth)
+        # plt.plot(x_fit, y_fit, color='red', label='Regression line')  # 回归线
+
+
+    plt.xlabel(xlabel,fontdict={"fontsize" : xylabelsize})
+    plt.tick_params(labelsize=labelsize)
+    plt.ylabel(ylabel,fontdict={"fontsize" : xylabelsize})
+    return plt
+
+def plot_ParameterRecovery(param_bounds,name,Est,Tru,fig_size = [10,10],xylabelsize=20,labelsize=20,titlesize=28):
+    # if len(ACC) ==1:
+    #     ACC = np.ones((len(Est[name]),1))
+
+    min_lim = param_bounds[0]
+    max_lim = param_bounds[1]
+    fig = plt.figure()
+    fig.set_size_inches(fig_size[0],fig_size[1])
+    plt.scatter(Est[name],y=Tru[name]) 
+    # plt.scatter(Est[name],y=Tru[name],alpha=ACC)
+    plt.xlim(min_lim,max_lim)
+    plt.ylim(min_lim,max_lim)
+    l = np.arange(min_lim,max_lim,(max_lim-min_lim)/200)
+    plt.plot(l,l)
+    plt.title('Parameter Recovery of '+name,fontdict={"fontsize" : titlesize})
+    plt.xlabel('estimated',fontdict={"fontsize" : xylabelsize})
+    plt.ylabel('true',fontdict={"fontsize" : xylabelsize}) 
+
+
+    plt.tick_params(labelsize=labelsize)
+
+    plt.show()
+
 # sys.path.append(r"D:\horiz\IMPORTANT\0study_graduate\Pro_COMPASS\COMPASS_DDM\results\test3")
 
 plot_heatmap = 0
 plot_single_setting = 1
+plot_ProPow = 1
 
-ResultPath = "results\\test3"
+ResultPath = "results\\test_Cluster\\v_0.3"
 DDM_id = "ddm"
+range_ntrials = [100]
+range_npp = [40]
 tau = 0.8
-nreps = 20
-range_ntrials = [60]
-range_npp = [20]
+nreps = 80
+
 p_list = ['v','a','z','t']
 
 heatmap_v = np.zeros((len(range_ntrials),len(range_npp)))
@@ -31,7 +78,9 @@ for n_t in range(len(range_ntrials)):
         Parameters = ssms.config.model_config[DDM_id]["params"]
         OutputFile_name = 'OutputIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)
         OutputFile_path = os.path.join(os.getcwd(), ResultPath, OutputFile_name)
-        OutputResults = pd.read_csv(OutputFile_path, delimiter = ',')
+        out_cn = Parameters+["ACC","RT"]
+        OutputResults = pd.read_csv(OutputFile_path, delimiter = ',')[out_cn].dropna(axis = 0)
+
 
         PowerFile_name = 'PowerIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)
         PowerFile_path = os.path.join(os.getcwd(), ResultPath, PowerFile_name)
@@ -41,7 +90,7 @@ for n_t in range(len(range_ntrials)):
         # tau = OutputResults['tau'].values[-1]
         if plot_single_setting:
             for p in Parameters :
-                
+                    plt.figure(figsize=(12, 12))
                     fig, axes = plt.subplots(nrows = 1, ncols = 1)
                     sns.set_theme(style = "white",font_scale=1.4)
                     sns.kdeplot(OutputResults[p].dropna(axis = 0), ax = axes)
@@ -55,13 +104,35 @@ for n_t in range(len(range_ntrials)):
                     axes.set_ylabel('Density',fontsize = 20)
 
                     plt.show()
+        if plot_ProPow:
+            for n_p in range(len(p_list)):
+                x = OutputResults[p_list[n_p]].values
+                y = OutputResults["ACC"].values
+                plt = ImPlot_plot("Correlation between ACC \nand recovery of "+p_list[n_p],
+                            x,p_list[n_p],y ,'ACC',
+                            type = "scatter",titlesize=35,xylabelsize=25,labelsize = 25,linewidth = 20)
+                sns.regplot(x=OutputResults[p_list[n_p]], y=OutputResults["ACC"])
+                corr_coef, p_value = stats.pearsonr(x, y)
+                annotation = f"Correlation coefficient: {corr_coef:.2f}\nP-value: {p_value:.4f}"
+                plt.annotate(annotation, xy=(0.1, 0.85), xycoords='axes fraction', fontsize=20)
+
+                file_name = '\ProPowIC{}T{}N{}M_{}.png'.format(ntrials,npp,nreps,p_list[n_p])
+                plt.savefig(ResultPath+file_name,bbox_inches='tight')
+
+
 
         if plot_heatmap:
             heatmap_v[n_t,n_p] = PowerResults['v'][0]
             heatmap_a[n_t,n_p] = PowerResults['a'][0]
             heatmap_z[n_t,n_p] = PowerResults['z'][0]
             heatmap_t[n_t,n_p] = PowerResults['t'][0]
-            
+        
+
+
+
+    plt.tick_params(labelsize=labelsize)
+
+    plt.show()
 
 Power_AllData = (heatmap_v,heatmap_a,heatmap_z,heatmap_t)
 
