@@ -58,12 +58,11 @@ def generate_parameters_DDM(means,stds, param_bounds, npp = 150, multivariate = 
         mean  = means[par_ind]
         std = stds[par_ind]
         # draw 'npp' values from multivariate normal distribution with mean 'mean', standard deviation 'std' and correlation 'cor'
-        parameters = np.round(np.random.multivariate_normal([mean, 0], np.array([[corr*std, std], [std, corr*std]]), npp),3)
+        parameters = np.random.multivariate_normal([mean, 0], np.array([[corr*std, std], [std, corr*std]]), npp)
         # while-loop: ensure no learning rate parameters get a value smaller than or equal to 0
         while max(parameters[:,0])>param_bounds[1][par_ind] or min(parameters[:,0])<param_bounds[0][par_ind]:
             outerID = np.logical_or(parameters[:,0] <= param_bounds[0][par_ind],parameters[:,0] >= param_bounds[1][par_ind])
-            parameters[outerID] = np.round(np.random.multivariate_normal([mean, 0], np.array([[corr*std, std], [std, corr*std]]), size = sum(outerID)),3)
-
+            parameters[outerID] = np.random.multivariate_normal([mean, 0], np.array([[corr*std, std], [std, corr*std]]), size = sum(outerID))
     else:
         # sample all parameters 
         parameters = np.zeros((npp, len(means)))
@@ -71,11 +70,11 @@ def generate_parameters_DDM(means,stds, param_bounds, npp = 150, multivariate = 
             
         for p in range(len(means)):
             # draw 'npp' values from normal distribution with mean 'mean' and standard deviation 'std'
-            parameters[:,p] = np.round(np.random.normal(loc = means[p], scale = stds[p], size = npp), 3)
+            parameters[:,p] = np.random.normal(loc = means[p], scale = stds[p], size = npp)
             
             while max(parameters[:,p])>param_bounds[1][p] or min(parameters[:,p])<param_bounds[0][p]:
                 outerID = np.logical_or(parameters[:,p] <= param_bounds[0][p],parameters[:,p] >= param_bounds[1][p])
-                parameters[outerID,p] = np.round(np.random.normal(loc = means[p], scale = stds[p], size = sum(outerID)), 3)
+                parameters[outerID,p] = np.random.normal(loc = means[p], scale = stds[p], size = sum(outerID))
                 
             # while-loop: ensure no parameters get a value smaller than or equal to 0
 # =============================================================================
@@ -105,7 +104,7 @@ def simulate_responses_DDM(theta = np.array([0,1.6,0.5,1,0.6]), DDM_id = 'angle'
     -----------
     Function to simulate a response on each trial for a given participant with LR = simulation_LR and inverseTemperature = simulation_inverseTemp.
     The design used for data generation for this participant should also be used for parameter estimation for this participant when running the function 'likelihood_estimation'."""
-    from ssms.basic_simulators import simulator 
+    from ssms.basic_simulators.simulator import simulator 
     
     sim_out = simulator(theta = theta,
                         model = DDM_id, 
@@ -216,7 +215,10 @@ def Incorrelation_repetition_DDM(means,stds ,
                 waste_counter = waste_counter+1
          
         ACC_out[pp] = ACC
+
         RT_out[pp] = RT
+
+
 
         ####Part 3: parameter estimation for this participant####
         fun = neg_likelihood
@@ -228,13 +230,17 @@ def Incorrelation_repetition_DDM(means,stds ,
         # print(Esti_Par[pp],neg_likelihood(Esti_Par[pp],arg)) 
         # print(np.array(True_Par.loc[pp]),neg_likelihood(True_Par.loc[pp],arg))
 
+    # Take average of Accuracy and RT since this is across subjects
+    ACC_average = float(sum(ACC_out))/len(ACC_out)
+    RT_average = float(sum(RT_out))/len(RT_out)
 
     Esti_Par['a'] = Esti_Par['a']/2
     ####Part 4: correlation between true & estimated learning rates####
     # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
     Statistic = np.empty((1,len(means)))
     for p in range(len(means)):
-        Statistic[0,p] = np.round(np.corrcoef(True_Par.iloc[:,p], Esti_Par.iloc[:,p])[0,1], 3)
+        #Statistic[0,p] = np.round(np.corrcoef(True_Par.iloc[:,p], Esti_Par.iloc[:,p])[0,1], 3)
+        Statistic[0,p] = np.corrcoef(True_Par.iloc[:,p], Esti_Par.iloc[:,p])[0, 1]
         print("Sample: {}/{}, Statistic of parameter {}: r = {}".format(rep,nreps,ssms.config.model_config[DDM_id]['params'][p],Statistic[0,p]))
 
  
@@ -245,7 +251,8 @@ def Incorrelation_repetition_DDM(means,stds ,
         print("\nThe power analysis will take ca. {} minutes".format(estimated_time))
     # return proportion_failed_estimates, Statistic
     
-    return Statistic, True_Par, Esti_Par, ACC_out, RT_out
+    return Statistic, True_Par, Esti_Par, ACC_average, RT_average
+
 def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_correlation, 
                                  npp, ntrials,rep, nreps, ncpu=6, method = 'Nelder-Mead'):
     """
@@ -332,12 +339,19 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
     param_bounds_Opti = np.array(ssms.config.model_config[DDM_id]['param_bounds'])
     param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2 
 
-    Col_UncPar = np.delete(range(len(means)),par_ind )
+    Col_UncPar = np.delete(range(len(means)),par_ind)
     waste_counter = 0
+
+    ACC_out = np.empty((npp,1))
+    RT_out = np.empty((npp,1))
+
     for pp in range(npp):
+        # AF-TODO ADDED
+        ##print(pp)
         ACC = 0
         ####Part 2: Data simulation for this participant####
-        while ACC <= 0.50 or ACC >= 0.95 or RT >= 10:
+        # AF MADE Change
+        while (ACC <= 0.50 or ACC >= 0.95 or RT >= 10):
         # generate the responses for this participant
 
             True_Par.iloc[pp, Col_UncPar] = generate_parameters_DDM(means = means[Col_UncPar], stds = stds[Col_UncPar], param_bounds = param_bounds, npp = 1)
@@ -346,25 +360,39 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
             # fill in the responses of this participant into the start design, in order to use this later in param. estimation
             responses = np.array(responses['rts'] * responses['choices'])
                         # validation of parameters
-                
-            ACC = np.mean( responses * True_Par.iloc[pp,0] > 0)            
+            
+            if True_Par.iloc[pp, 0] == 0:
+                ACC = np.mean( (responses * (True_Par.iloc[pp,0] + 0.001)) > 0)
+            else:      
+                ACC = np.mean( (responses * True_Par.iloc[pp,0]) > 0)
+
             RT = np.mean(np.abs(responses))
             
             if ACC <= 0.50 or ACC >= 0.95 or RT >= 10: 
                 waste_counter = waste_counter+1
-
-
+                if waste_counter >= 99:
+                    print('Accuracy is: {}'.format(ACC))
+                    print('RT is: {}'.format(RT))
+                    print('Parameters: {}'.format(True_Par.iloc[pp,:].values))
+                    print("waster_counter reached {}, something is probably not right!".format(waste_counter))
+                    #sys.stdout.fush()
 
         ####Part 3: parameter estimation for this participant####
         fun = neg_likelihood
         arg = (responses,DDM_id)
          # method = "Nelder-Mead"  or method=="Brute"
         # re-scaling parameter a
-        Esti_Par.iloc[pp,:] = MLE(fun,arg,param_bounds_Opti,method,show = 0)     
+        Esti_Par.iloc[pp,:] = MLE(fun,arg,param_bounds_Opti,method,show = 0)  
+
+        ACC_out[pp] = ACC
+        RT_out[pp] = RT   
 
         # print(Esti_Par[pp],neg_likelihood(Esti_Par[pp],arg)) 
         # print(np.array(True_Par.loc[pp]),neg_likelihood(True_Par.loc[pp],arg))
 
+    # Take average of Accuracy and RT since this is across subjects
+    ACC_average = float(sum(ACC_out))/len(ACC_out)
+    RT_average = float(sum(RT_out))/len(RT_out)
 
     Esti_Par['a'] = Esti_Par['a']/2
 
@@ -376,15 +404,17 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
     Esti_r = Stat[0]
     Esti_pValue = Stat[1]
 
-    print('sampel: {}/{}, statistics: r = {:.3f}, p = {:.3f}'.format(rep,nreps,Esti_r,Esti_pValue))
+    print('sample: {}/{}, statistics: r = {:.3f}, p = {:.3f}'.format(rep,nreps,Esti_r,Esti_pValue))
 
     if rep == 0:
         t1 = time.time() - t0
         estimated_seconds = t1 * np.ceil(nreps / ncpu)
         estimated_time = np.ceil(estimated_seconds / 60)
         print("\nThe power analysis will take ca. {} minutes".format(estimated_time))
+    
     # return proportion_failed_estimates, Statistic
-    return Esti_r, Esti_pValue, True_r, True_pValue
+    return Esti_r, Esti_pValue, True_r, True_pValue, ACC_average, RT_average
+
 def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, par_ind,param_bounds,
                                    npp_per_group, ntrials, rep, nreps, ncpu, standard_power = False):
     """
@@ -468,7 +498,7 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
 
 
 
-        # loop over all pp. to do the data generation and parameter estimation
+    # loop over all pp. to do the data generation and parameter estimation
     for pp in range(npp_per_group*2):
         if pp <= npp_per_group-1:
             group = 1
@@ -492,7 +522,7 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
             responses = np.array(responses['rts'] * responses['choices'])
                         # validation of parameters
             
-            ACC = np.mean( responses * True_Par['v'][pp] > 0)     # [pp,1]:index of v, drfit rate       
+            ACC = np.mean(responses * True_Par['v'][pp] > 0)     # [pp,1]:index of v, drfit rate       
             RT = np.mean(np.abs(responses))
             
             if ACC <= 0.50 or ACC >= 0.95 or RT >= 10: 
@@ -524,7 +554,7 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
     # because alternative = less does not exist in scipy version 1.4.0, yet we want a one-sided test
     pValue = pValue/2 
 
-    print('sampel: {}/{}, statistics: t = {:.3f}, p = {:.3f}'.format(rep,nreps,Statistic,pValue))
+    print('sample: {}/{}, statistics: t = {:.3f}, p = {:.3f}'.format(rep,nreps,Statistic,pValue))
 
     if rep == 0:
         t1 = time.time() - t0

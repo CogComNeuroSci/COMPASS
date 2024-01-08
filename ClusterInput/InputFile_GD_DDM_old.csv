@@ -1,4 +1,4 @@
-model,ntrials,npp_group,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,par_ind,TypeIerror,nreps,full_speed,output_folder
+model,ntrials,npp,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,par_ind,TypeIerror,nreps,full_speed,output_folder
 ddm,80,40,"0,0.06",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0,0.05,500,1,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test_Multi/
 ddm,240,40,"0,0.06",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0,0.05,500,1,
 ddm,400,40,"0,0.06",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0,0.05,500,1,
