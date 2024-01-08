@@ -72,4 +72,6 @@ For GD criterion, you should define:
 2. Run PowerAnalysis.py with criterion as input: python PowerAnalysis.py IC_DDM, python PowerAnalysis.py GD_DDM, python PowerAnalysis.py EC_DDM depending on the criterion that you want to use.
 
 
+### Output files
+PowerIC{}T{}N{}M_{}.png
 

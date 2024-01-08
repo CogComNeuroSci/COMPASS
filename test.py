@@ -78,7 +78,7 @@ def plot_ParameterRecovery(param_bounds,name,Est,Tru,fig_size = [10,10],xylabels
     max_lim = param_bounds[1]
     fig = plt.figure()
     fig.set_size_inches(fig_size[0],fig_size[1])
-    plt.scatter(Est[name],y=Tru[name])
+    plt.scatter(Est[name],y=Tru[name]) 
     # plt.scatter(Est[name],y=Tru[name],alpha=ACC)
     plt.xlim(min_lim,max_lim)
     plt.ylim(min_lim,max_lim)

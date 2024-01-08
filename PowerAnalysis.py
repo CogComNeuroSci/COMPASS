@@ -84,29 +84,18 @@ def power_estimation_Incorrelation_DDM(means = None, stds=None, DDM_id = "ddm",
     print("Optimization Method:",method)
 
     param_bounds = np.array(ssms.config.model_config[DDM_id]['param_bounds'])
-
     out_AllReturns = pool.starmap(Incorrelation_repetition_DDM, [(means,stds, param_bounds, 
                                                    npp, ntrials,DDM_id,method,
                                                    rep, nreps, ncpu) for rep in range(nreps)])
 
-
-    
-    # out = Incorrelation_repetition(means,stds, param_bounds, 
-    #                                npp, ntrials,DDM_id,method,
-    #                               1, nreps, n_cpu) 
-    
     pool.close()
     pool.join()
     # allreps_output = pd.DataFrame(out_AllReturns, columns = ['Statistic','True_Par','Esti_Par', 'ACC_out', 'RT_out'])
 
     out = [IC_Sta[0] for IC_Sta in out_AllReturns]
     True_out = [IC_Sta[1] for IC_Sta in out_AllReturns]
-
-    allreps_output = pd.DataFrame(np.array(out).reshape(nreps,len(means)),columns=ssms.config.model_config[DDM_id]['params'])
-    # add acc_average and rt_average
-    allreps_output['RT_average'] = [out_tmp[-1] for out_tmp in out_AllReturns]
-    allreps_output['ACC_average'] = [out_tmp[-2] for out_tmp in out_AllReturns]
-
+    cn = ssms.config.model_config[DDM_id]['params']+["ACC_average","RT_average"]
+    allreps_output = pd.DataFrame(np.array(out).reshape(nreps,len(means)+2),columns=cn)
     power_estimate = pd.DataFrame(np.empty((1,len(means))),columns=ssms.config.model_config[DDM_id]['params'])
    
     for p in range(len(means)):
@@ -142,7 +131,7 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
     typeIerror : float
         Critical value for p-values. From this also the cut-off for the correlation statistic can be determined.
     ncpu: integer
-        number of cpu used
+        Number of cpu used
 
 
     Returns
@@ -151,6 +140,7 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
         Pandas dataframe containing estimated and statistics of the parameter of interest: estimated correlation coefficient, estimated p-value, true correlation coefficient, true p-value
     power_estimate: dataframe
         Results of power analysis, including: the name of parameter calulated, correlation cut-off value(i.e., tau), trure p-value, conventional power.
+    
     Description
     -----------
     Function that actually calculates the probability to obtain significant correlations with external measures.
@@ -188,13 +178,11 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
     pool.close()
     pool.join()
 
-    allreps_output = pd.DataFrame(out, columns = ['Esti_r', 'Esti_pValue', 'True_r', 'True_pValue', 'ACC_average', "RT_average"])
+    allreps_output = pd.DataFrame(out, columns = ['Esti_r', 'Esti_pValue', 'True_r', 'True_pValue', "ACC_average", "RT_average"])
 
     #Compute power if estimates would be perfect.
-
     #Compute power for correlation with estimated parameter values.
-    
-    power_estimate =  pd.DataFrame(np.empty((1,4)), columns=[ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
+    power_estimate =  pd.DataFrame(np.empty((1,4)), columns=["power_"+ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
     power_estimate.iloc[0,0] = np.mean((allreps_output['Esti_pValue'] <= typeIerror/2)*1)
     power_estimate.iloc[0]['tau'] = tau
     power_estimate.iloc[0]['true_pValue'] = true_pValue
@@ -214,13 +202,13 @@ def power_estimation_groupdifference_DDM(cohens_d, means_g1,means_g2,stds_g1,std
     Parameters
     ----------
     means_g1: array
-        means of the distribution from which samples true parameters of group 1
+        Means of the distribution from which samples true parameters of group 1
     means_g2: array
-        means of the distribution from which samples true parameters of group 2
+        Means of the distribution from which samples true parameters of group 2
     stds_g1: array
-        stds of the distribution from which samples true parameters of group 1
+        Stds of the distribution from which samples true parameters of group 1
     stds_g2: array
-        stds of the distribution from which samples true parameters of group 2
+        Stds of the distribution from which samples true parameters of group 2
     DDM_id: string
         Index of DDM model which should be matched with ssms package
     par_ind:
@@ -256,6 +244,7 @@ def power_estimation_groupdifference_DDM(cohens_d, means_g1,means_g2,stds_g1,std
     #Compute conventional power
     conventional_power = 1-stat.nct.cdf(tau, (npp_per_group-1)*2, cohens_d*np.sqrt(npp_per_group))
 
+
     print("\nProbability to obtain a significant group difference under conventional power implementation: {}%".format(np.round(conventional_power*100,2)))
     print(str("\nEstimated effect size d = : {}".format(np.round(cohens_d,3))))
     print(str("\nThe t-distribution cut-off value is: {}".format(np.round(tau,3))))
@@ -289,7 +278,7 @@ def GetMeansStd(InputDictionary , row):
     """
     Parameters
     ----------
-    InputDictionary： Dictionary
+    InputDictionary: Dictionary
         Configures from the input csv file
 
     Returns
@@ -436,11 +425,13 @@ if __name__ == '__main__':
                                                                         cut_off = tau)
 
             # POST PROCESS
-            output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(args.output_folder, 'OutputIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)))
-            power_estimate = pd.concat([power_estimate, InputParameters])
-            power_estimate.to_csv(os.path.join(args.output_folder, 'PowerIC{}T{}N{}M.csv'.format(ntrials,npp, nreps)))
-
+            # output = pd.concat([output,InputParameters])
+            time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            InputParameters.to_csv(os.path.join(output_folder, 'InputIC{}T{}N{}M_{}.csv'.format(ntrials,npp, nreps, time)))
+            output.to_csv(os.path.join(output_folder, 'OutputIC{}T{}N{}M_{}.csv'.format(ntrials,npp, nreps,time)))
+            # power_estimate = pd.concat([power_estimate,InputParameters])
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerIC{}T{}N{}M_{}.csv'.format(ntrials,npp, nreps,time)))
+            
             # PLOTTING
             Parameters = ssms.config.model_config[DDM_id]["params"]
             for p in Parameters :
@@ -463,6 +454,7 @@ if __name__ == '__main__':
                     plt.show(block=False)
                 else:
                     plt.close()
+                    
 # EC
         elif args.criterion == "EC":
             npp = InputDictionary['npp'][row]
@@ -491,14 +483,16 @@ if __name__ == '__main__':
                                                                         True_correlation,npp, ntrials, nreps,
                                                                         typeIerror, ncpu = ncpu)
 
-            # POST PROCESS # TODO AF: Fix line below
-            output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(args.output_folder, 'OutputEC{}P{}SD{}TC{}T{}N{}M.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
-                                                                                      npp, nreps)))
+            # output = pd.concat([output,InputParameters])
+            time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            InputParameters.to_csv(os.path.join(output_folder, 'InputEC{}P{}SD{}TC{}T{}N{}M_{}.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)))           
+            output.to_csv(os.path.join(output_folder, 'OutputEC{}P{}SD{}TC{}T{}N{}M_{}.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)))
             
-            power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
-            power_estimate.to_csv(os.path.join(args.output_folder, 'PowerEC{}P{}SD{}TC{}T{}N{}M.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
-                                                                                      npp, nreps)))
+            # power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerEC{}P{}SD{}TC{}T{}N{}M_{}.csv'.format(par_ind,s_pooled, True_correlation, ntrials,
+                                                                                      npp, nreps,time)))  
 
             # TODO: AF - THIS IS JUST FOR DEBUGGING - UNCOMMENT AGAIN!
             # PLOTTING
@@ -570,13 +564,15 @@ if __name__ == '__main__':
                                                                       npp_per_group = npp_pergroup, ntrials = ntrials,
                                                                       nreps = nreps, typeIerror = typeIerror, ncpu=ncpu)
 
-
-            output = pd.concat([output,InputParameters])
-            output.to_csv(os.path.join(args.output_folder, 'OutputGD{}P{}SD{}T{}N{}M{}ES.csv'.format(par_ind,np.round(s_pooled,2),
-                                                                                                ntrials,npp_pergroup, nreps, np.round(cohens_d,2))))
-            power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
-            power_estimate.to_csv(os.path.join(args.output_folder, 'PowerGD{}P{}SD{}T{}N{}M{}ES.csv'.format(par_ind,np.round(s_pooled,2),ntrials,
-                                                                                      npp_pergroup, nreps,np.round(cohens_d,2))))
+            # output = pd.concat([output,InputParameters])
+            time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            InputParameters.to_csv(os.path.join(output_folder, 'InputGD{}P{}SD{}T{}N{}M{}ES_{}.csv'.format(par_ind,np.round(s_pooled,2),
+                                                                                                ntrials,npp_pergroup, nreps, np.round(cohens_d,2),time)))
+            output.to_csv(os.path.join(output_folder, 'OutputGD{}P{}SD{}T{}N{}M{}ES_{}.csv'.format(par_ind,np.round(s_pooled,2),
+                                                                                                ntrials,npp_pergroup, nreps, np.round(cohens_d,2),time)))
+            # power_estimate = pd.concat([pd.DataFrame(power_estimate),InputParameters])
+            power_estimate.to_csv(os.path.join(output_folder, 'PowerGD{}P{}SD{}T{}N{}M{}_{}ES.csv'.format(par_ind,np.round(s_pooled,2),ntrials,
+                                                                                      npp_pergroup, nreps,np.round(cohens_d,2),time)))
 
             p_n = ssms.config.model_config[DDM_id]['params'][par_ind]
             fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(10, 10))
