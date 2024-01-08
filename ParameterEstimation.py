@@ -24,7 +24,7 @@ def MLE(fun,arg,param_bounds,method, show = 0):
 
     elif method=="Nelder-Mead":
         estimated_parameters_MulIni = np.empty((10 * param_bounds.shape[1],param_bounds.shape[1]+1))
-        for r in range(10 * num_par): # loop for multiple initial guesses
+        for r in range(2 * num_par): # loop for multiple initial guesses # 10 * num_par
             
             start_params = np.random.uniform(param_bounds[0],param_bounds[1])
             if show :
@@ -37,7 +37,8 @@ def MLE(fun,arg,param_bounds,method, show = 0):
                                                     method="Nelder-Mead",
                                                     bounds= ranges,
                                                     # bounds= tuple(param_bounds.T.reshape(num_par,2)),
-                                                    options = {'maxfev':1000, 'xatol':0.01, 'return_all':1})
+                                                    options = {'maxfev':1000, 'xatol':0.01, 'return_all':1},
+             ) # 'disp': 1})
             estimated_parameters_SinIni = optimization_output['x']
             if show :
                 print('end point',estimated_parameters_SinIni,fun(estimated_parameters_SinIni,arg)) 

@@ -133,7 +133,7 @@ if __name__ == '__main__':
     predict_on_batch_out = network.predict_on_batch(data.values.astype(np.float32))
 
     # Simulations
-    from ssms.basic_simulators import simulator 
+    from ssms.basic_simulators.simulator import simulator 
     sim_out = simulator(model = 'angle', 
                         theta = data.values[0, :-2],
                         n_samples = 2000)

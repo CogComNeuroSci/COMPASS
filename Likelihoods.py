@@ -7,7 +7,8 @@ Created on Wed Jul 19 23:03:42 2023
 
 import math
 from wfpt import wiener_like
-from wfpt_n.wfpt_n import wiener_like_n
+#from wfpt_n.wfpt_n import wiener_like_n
+from wfpt_n import wiener_like_n
 import numpy as np
 
 def neg_likelihood(param,arg):
@@ -15,10 +16,11 @@ def neg_likelihood(param,arg):
     data = arg[0]
     DDM_id = arg[1]
     if DDM_id =="ddm":
-        llh = wiener_like_n(data,param[0],0,
-                                param[1],
-                                param[2],0,
-                                param[3],0,err)
+        llh = wiener_like_n(data,
+                            param[0],0,
+                            param[1],
+                            param[2],0,
+                            param[3],0,err)
 # =============================================================================
 #         parameters of wienr_like
 #         def wiener_like(np.ndarray[double, ndim=1] x, double v, double sv, double a, double z, double sz, double t,
