@@ -71,7 +71,6 @@ def MLE(fun,arg,param_bounds,method, show = 0):
             print('end point',estimated_parameters_SinIni,fun(estimated_parameters_SinIni,arg)) 
         estimated_parameters_MulIni[r,0:num_par] = estimated_parameters_SinIni
         estimated_parameters_MulIni[r,num_par] = fun(estimated_parameters_SinIni,arg)
-
         estimated_parameters = estimated_parameters_MulIni[np.argmin(list(estimated_parameters_MulIni[:,-1])),0:num_par]
 
     return estimated_parameters
