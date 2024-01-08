@@ -26,17 +26,17 @@ def generate_parameters_DDM(means,stds, param_bounds, npp = 150, multivariate = 
     Parameters
     ----------
     means : 1 * n array 
-        means of parameters in an array. n: number of parameters
+        Means of parameters in an array. n: number of parameters
     stds : 1 * n array 
         The standard deviation of the normal distribution from which parameters are drawn. The default is 0.1.
     param_bounds: 2 * n array
-        min and max of parameters 
+        Min and max of parameters 
     npp: int
-        sample size of participants and parameters      
+        Sample size of participants and parameters      
     multivariate: boolean, optional
         Put to true for the external correlation criterion such that values are drawn from multivariate normal distribution. The default is False.
     par_ind: int, optional (only used when multivariate = True)
-        the index of parameter which is hypothetically correlated with an external measure
+        The index of parameter which is hypothetically correlated with an external measure
     corr: boolean or float, optional
         The correlation for the external correlation criterion. For other criterions this is ignored. The default is False.
     Returns
@@ -84,12 +84,12 @@ def simulate_responses_DDM(theta = np.array([0,1.6,0.5,1,0.6]), DDM_id = 'angle'
 
     simulate_responses_DDM
     ----------
-        theta : 1 * n array， n: number of parameters 
-            parameters in an array to generate responses from ssms package.
+        theta : 1 * n array,  n: number of parameters 
+            Parameters in an array to generate responses from ssms package.
         DDM_id: string
             Index of DDM model which should be matched with ssms package
-        n_samples：int
-            number of trials that will be simulated
+        n_samples: int
+            Number of trials that will be simulated
 
     
     Returns
@@ -130,7 +130,7 @@ def Incorrelation_repetition_DDM(means,stds ,
     stds: 1 * n array
         Stds of distribution from which true parameters are sampled
     param_bounds: 2 * n array
-        range of parameters, the 0th row corresponds to lower bound, the 1st corresponds to upper bound
+        Range of parameters, the 0th row corresponds to lower bound, the 1st corresponds to upper bound
     npp : integer
         Number of participants in the study.
     ntrials : integer
@@ -138,7 +138,7 @@ def Incorrelation_repetition_DDM(means,stds ,
     DDM_id: string
         Index of DDM model which should be matched with SSMS package
     method: string
-        method of optimization, either "Nelder-Mead" or "Brute"
+        Method of optimization, either "Nelder-Mead" or "Brute"
     rep : integer
         Which repetition of the power estimation process is being executed.
     nreps: integer
@@ -188,7 +188,7 @@ def Incorrelation_repetition_DDM(means,stds ,
     As the parameter a was unmatched scaled in wfpt likelihood functions, this function includes corrected scales of this parameter explicitly.
     It is achieved by: 
     (1) double optimization range of 'a', i.e., param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2  
-    (2) take 1/2 of estimated parameter "a", 
+    (2) take 1/2 of estimated parameter "a"
     """
 
     if rep == 0:
@@ -223,7 +223,7 @@ def Incorrelation_repetition_DDM(means,stds ,
     for pp in range(npp): # loop for participants
         ACC = 0
         ####Part 2: Data simulation for this participant####
-        while ACC <= 0.50 or ACC >= 0.95 or RT >= 10:
+        while ACC <= 0.5 or ACC >= 0.95 or RT >= 10:
         # generate the responses for this participant
 
             True_Par.iloc[pp,:] = generate_parameters_DDM(means = means, stds = stds, 
@@ -235,10 +235,10 @@ def Incorrelation_repetition_DDM(means,stds ,
             responses = np.array(responses['rts'] * responses['choices'])
             # validation of parameters
             
-            ACC = np.mean( responses*True_Par.iloc[pp,0] > 0)            
+            ACC = np.mean(responses * True_Par.iloc[pp,0] > 0)            
             RT = np.mean(np.abs(responses))
             
-            if ACC <= 0.50 or ACC >= 0.95 or RT >= 10: 
+            if ACC <= 0.5 or ACC >= 0.95 or RT >= 10: 
                 waste_counter = waste_counter+1
          
         ACC_out[pp] = ACC
@@ -248,13 +248,13 @@ def Incorrelation_repetition_DDM(means,stds ,
         fun = neg_likelihood
         arg = (responses,DDM_id)
          # method = "Nelder-Mead"  or method=="Brute"
-        # re-scaling parameter a
+
         Esti_Par.iloc[pp,:] = MLE(fun,arg,param_bounds_Opti,method,show = 0)     
 
         # print(Esti_Par[pp],neg_likelihood(Esti_Par[pp],arg)) 
         # print(np.array(True_Par.loc[pp]),neg_likelihood(True_Par.loc[pp],arg))
 
-
+    # re-scaling parameter a
     Esti_Par['a'] = Esti_Par['a']/2
     ####Part 4: correlation between true & estimated learning rates####
     # if the estimation failed for a certain participant, delete this participant from the correlation estimation for this repetition
@@ -349,6 +349,12 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
             correlation(external measure, recovered parameter of interest), and its p-value;
             correlation(external measure, true parameter of interest), and its p-value;
             average ACC and RT
+    
+    NOTE: RESCALING BOUNDARY PARAMETER "A"
+    As the parameter a was unmatched scaled in wfpt likelihood functions, this function includes corrected scales of this parameter explicitly.
+    It is achieved by: 
+    (1) double optimization range of 'a', i.e., param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2  
+    (2) take 1/2 of estimated parameter "a"
 
     """
    
@@ -369,8 +375,6 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
     Esti_Par.columns = ssms.config.model_config[DDM_id]['params']
 
     # rescale optimizing range of parameter 'a'
-    # param_bounds_Opti = param_bounds
-    # param_bounds_Opti[:,1] = param_bounds[:,1]*2 
     param_bounds_Opti = np.array(ssms.config.model_config[DDM_id]['param_bounds'])
     if DDM_id =="ddm":
         param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2 
@@ -410,7 +414,6 @@ def Excorrelation_repetition_DDM(means,stds , param_bounds, par_ind,DDM_id,true_
         # print(Esti_Par[pp],neg_likelihood(Esti_Par[pp],arg)) 
         # print(np.array(True_Par.loc[pp]),neg_likelihood(True_Par.loc[pp],arg))
 
-
     Esti_Par['a'] = Esti_Par['a']/2
 
     ####Part 4: correlation between true & estimated learning rates####
@@ -440,19 +443,19 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
     Parameters
     ----------
     means_g1: array
-        means of the distribution from which samples true parameters of group 1
+        Means of the distribution from which samples true parameters of group 1
     means_g2: array
-        means of the distribution from which samples true parameters of group 2
+        Means of the distribution from which samples true parameters of group 2
     stds_g1: array
-        stds of the distribution from which samples true parameters of group 1
+        Stds of the distribution from which samples true parameters of group 1
     stds_g2: array
-        stds of the distribution from which samples true parameters of group 2
+        Stds of the distribution from which samples true parameters of group 2
     DDM_id: string
         Index of DDM model which should be matched with ssms package
     par_ind: int
         The index of parameter of interest, start from 0
     param_bounds: 2 * n array
-        range of parameters, the 0th row corresponds to lower bound, the 1st corresponds to upper bound
+        Range of parameters, the 0th row corresponds to lower bound, the 1st corresponds to upper bound
     npp_per_group : integer
         Number of participants in each group that will be used in the parameter recovery analysis.
     ntrials : integer
@@ -481,8 +484,6 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
         average RT of group 1
     RT_g2: float
         average RT of group 2
-    pValue : float
-
 
 
     Description
@@ -512,7 +513,13 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
 
         5. Calculate the Statistic of interest for this repetition of the parameter recovery analysis.
             The statistic that is calculated here is the p-value associated with the T-statistic which is obtained by a two-sample t-test comparing the recovered parameter of interest for group 1 and group 2.
- """
+
+    NOTE: RESCALING BOUNDARY PARAMETER "A"
+    As the parameter a was unmatched scaled in wfpt likelihood functions, this function includes corrected scales of this parameter explicitly.
+    It is achieved by: 
+    (1) double optimization range of 'a', i.e., param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2  
+    (2) take 1/2 of estimated parameter "a"
+    """
     if rep == 0:
         t0 = time.time()
 
@@ -531,12 +538,12 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
     RT_out = np.empty((npp_per_group*2,2))
 
     param_bounds_Opti =  np.array(ssms.config.model_config[DDM_id]['param_bounds'])
-    param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2  # rescale parameter a
+    if DDM_id == "ddm":
+        param_bounds_Opti[:,1] = param_bounds_Opti[:,1]*2  # rescale parameter a
     waste_counter = 0
 
 
-
-        # loop over all pp. to do the data generation and parameter estimation
+    # loop over all pp. to do the data generation and parameter estimation
     for pp in range(npp_per_group*2):
         if pp <= npp_per_group-1:
             group = 1
@@ -572,7 +579,6 @@ def Groupdifference_repetition_DDM(means_g1, stds_g1,means_g2, stds_g2,DDM_id, p
         ####Part 3: parameter estimation for this participant####
         fun = neg_likelihood
         arg = (responses,DDM_id)
-        method ='Nelder-Mead'
         Esti_Par.iloc[pp,0] = group 
         Esti_Par.iloc[pp,1:] = MLE(fun,arg,param_bounds_Opti,method,show = 0)     
 

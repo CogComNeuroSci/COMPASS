@@ -77,30 +77,14 @@ def power_estimation_Incorrelation_DDM(means = None, stds=None, DDM_id = "ddm",
     else: n_cpu = 1
     #divide process over multiple cores
     pool = Pool(processes = n_cpu)
-    
-    # Parameter distribution
-    
-# =============================================================================
-#     # Incorrelation_repetition(means ,stds , 
-#                                      param_bounds , 
-#                                      npp = 150, 
-#                                      ntrials = 450, DDM_id = "angle", rep=1, nreps = 250, ncpu = 6):
-# =============================================================================
 
     print("Optimization Method:",method)
 
     param_bounds = np.array(ssms.config.model_config[DDM_id]['param_bounds'])
-
     out_AllReturns = pool.starmap(Incorrelation_repetition_DDM, [(means,stds, param_bounds, 
                                                    npp, ntrials,DDM_id,method,
                                                    rep, nreps, n_cpu) for rep in range(nreps)])
 
-
-    
-    # out = Incorrelation_repetition(means,stds, param_bounds, 
-    #                                npp, ntrials,DDM_id,method,
-    #                               1, nreps, n_cpu) 
-    
     pool.close()
     pool.join()
     # allreps_output = pd.DataFrame(out_AllReturns, columns = ['Statistic','True_Par','Esti_Par', 'ACC_out', 'RT_out'])
@@ -146,7 +130,7 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
     high_performance : bool (True or False)
         Defines whether multiple cores on the computer will be used in order to estimate the power.
     ncpu: integer
-        number of cpu used
+        Number of cpu used
 
 
     Returns
@@ -155,6 +139,7 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
         Pandas dataframe containing estimated and statistics of the parameter of interest: estimated correlation coefficient, estimated p-value, true correlation coefficient, true p-value
     power_estimate: dataframe
         Results of power analysis, including: the name of parameter calulated, correlation cut-off value(i.e., tau), trure p-value, conventional power.
+    
     Description
     -----------
     Function that actually calculates the probability to obtain significant correlations with external measures.
@@ -198,9 +183,7 @@ def power_estimation_Excorrelation_DDM(means,stds,par_ind,DDM_id,true_correlatio
     allreps_output = pd.DataFrame(out, columns = ['Esti_r', 'Esti_pValue', 'True_r', 'True_pValue',"ACC", "RT"])
 
     #Compute power if estimates would be perfect.
-
     #Compute power for correlation with estimated parameter values.
-    
     power_estimate =  pd.DataFrame(np.empty((1,4)), columns=["power_"+ssms.config.model_config[DDM_id]['params'][par_ind],"tau",'true_pValue','conventional_power'])
     power_estimate.iloc[0,0] = np.mean((allreps_output['Esti_pValue'] <= typeIerror/2)*1)
     power_estimate.iloc[0]['tau'] = tau
@@ -220,13 +203,13 @@ def power_estimation_groupdifference_DDM(cohens_d, means_g1,means_g2,stds_g1,std
     Parameters
     ----------
     means_g1: array
-        means of the distribution from which samples true parameters of group 1
+        Means of the distribution from which samples true parameters of group 1
     means_g2: array
-        means of the distribution from which samples true parameters of group 2
+        Means of the distribution from which samples true parameters of group 2
     stds_g1: array
-        stds of the distribution from which samples true parameters of group 1
+        Stds of the distribution from which samples true parameters of group 1
     stds_g2: array
-        stds of the distribution from which samples true parameters of group 2
+        Stds of the distribution from which samples true parameters of group 2
     DDM_id: string
         Index of DDM model which should be matched with ssms package
     par_ind:
@@ -302,7 +285,7 @@ def GetMeansStd(InputDictionary):
     """
     Parameters
     ----------
-    InputDictionary： Dictionary
+    InputDictionary: Dictionary
         Configures from the input csv file
 
     Returns
@@ -454,11 +437,6 @@ if __name__ == '__main__':
             
             if HPC == False:
 
-                # sns.kdeplot(output["Statistic"], label = "Correlation", ax = axes)
-                # fig.suptitle("Pr(Correlation > {}) \nconsidering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp, ntrials), fontweight = 'bold')
-                # axes.set_title("Power = {}% \nbased on {} reps with true correlation {}".format(np.round(power_estimate*100, 2), nreps, True_correlation))
-                # axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
-            
                 plt.tight_layout() 
                 p_n = "power_"+ssms.config.model_config[DDM_id]['params'][par_ind]
                 fig, axes = plt.subplots(nrows = 1, ncols = 1,figsize=(10,10))
@@ -539,12 +517,6 @@ if __name__ == '__main__':
             power_estimate.to_csv(os.path.join(output_folder, 'PowerGD{}P{}SD{}T{}N{}M{}_{}ES.csv'.format(par_ind,np.round(s_pooled,2),ntrials,
                                                                                       npp_pergroup, nreps,np.round(cohens_d,2),time)))
             if HPC == False:
-
-                # fig, axes = plt.subplots(nrows = 1, ncols = 1)
-                # sns.kdeplot(output["Statistic"], label = "T-statistic", ax = axes)
-                # fig.suptitle("Pr(T-statistic > {}) \nconsidering a type I error of {} \nwith {} pp, {} trials".format(np.round(tau,2), typeIerror, npp_pergroup, ntrials), fontweight = 'bold')
-                # axes.set_title("Power = {}% \nbased on {} reps with Cohen's d = {}".format(np.round(power_estimate*100, 2), nreps, np.round(cohens_d,2)))
-                # axes.axvline(x = tau, lw = 2, linestyle ="dashed", color ='k', label ='tau')
 
                 # plt.tight_layout() 
                 p_n = "power_"+ssms.config.model_config[DDM_id]['params'][par_ind]
