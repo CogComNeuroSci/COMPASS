@@ -1,0 +1,7 @@
+,Statistic,PValue,model,ntrials,npp_group,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,par_ind,TypeIerror,nreps,full_speed,output_folder
+0,-3.410344255864654,0.0046092259939737295,,,,,,,,,,,,,,,,
+1,-1.1217464849448955,0.14725418469178478,,,,,,,,,,,,,,,,
+2,-0.9333227021718921,0.1889811005861905,,,,,,,,,,,,,,,,
+0,,,ddm,5.0,5.0,"0,0.06",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0.0,0.05,3.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test_Multi/
+1,,,ddm,5.0,5.0,"0,0.15",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0.0,0.05,3.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test_Multi/
+2,,,ddm,5.0,5.0,"0,0.24",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0.0,0.05,3.0,1.0,D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM/results/test_Multi/
