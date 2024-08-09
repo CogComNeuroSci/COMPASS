@@ -1,0 +1,3 @@
+,v,tau,true_pValue,conventional_power,model,ntrials,npp_group,mean_v,mean_a,mean_z,mean_t,std_v,std_a,std_z,std_t,par_ind,TypeIerror,nreps,full_speed,output_folder
+0,0.996,1.9674519478606556,4.3011461059450085e-10,0.9999930489106271,,,,,,,,,,,,,,,,
+42,,,,,ddm,400,160,"0,0.15",1.18,0.5,0.5,"0.3,0.3",0.33,0.1,0.25,0,0.05,500,1,
