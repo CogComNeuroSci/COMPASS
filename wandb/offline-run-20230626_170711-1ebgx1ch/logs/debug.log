@@ -1,0 +1,32 @@
+2023-06-26 17:07:11,874 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Current SDK version is 0.15.4
+2023-06-26 17:07:11,874 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Configure stats pid to 9948
+2023-06-26 17:07:11,874 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Loading settings from C:\Users\horiz\.config\wandb\settings
+2023-06-26 17:07:11,874 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Loading settings from D:\horiz\IMPORTANT\0study_graduate\Pro_COMPASS\COMPASS_DLC\wandb\settings
+2023-06-26 17:07:11,874 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-06-26 17:07:11,874 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-06-26 17:07:11,876 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'test.py', 'program': 'D:\\horiz\\IMPORTANT\\0study_graduate\\Pro_COMPASS\\COMPASS_DLC\\test.py'}
+2023-06-26 17:07:11,876 INFO    MainThread:9948 [wandb_setup.py:_flush():76] Applying login settings: {'mode': 'offline'}
+2023-06-26 17:07:11,876 INFO    MainThread:9948 [wandb_init.py:_log_setup():507] Logging user logs to D:\horiz\IMPORTANT\0study_graduate\Pro_COMPASS\COMPASS_DLC\wandb\offline-run-20230626_170711-1ebgx1ch\logs\debug.log
+2023-06-26 17:07:11,876 INFO    MainThread:9948 [wandb_init.py:_log_setup():508] Logging internal logs to D:\horiz\IMPORTANT\0study_graduate\Pro_COMPASS\COMPASS_DLC\wandb\offline-run-20230626_170711-1ebgx1ch\logs\debug-internal.log
+2023-06-26 17:07:11,876 INFO    MainThread:9948 [wandb_init.py:init():547] calling init triggers
+2023-06-26 17:07:11,877 INFO    MainThread:9948 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'cpu_batch_size': 128, 'gpu_batch_size': 256, 'n_epochs': 5, 'optimizer': 'adam', 'learning_rate': 0.002, 'lr_scheduler': 'reduce_on_plateau', 'lr_scheduler_params': {}, 'weight_decay': 0.0, 'loss': 'huber', 'save_history': True}
+2023-06-26 17:07:11,877 INFO    MainThread:9948 [wandb_init.py:init():596] starting backend
+2023-06-26 17:07:11,877 INFO    MainThread:9948 [wandb_init.py:init():600] setting up manager
+2023-06-26 17:07:11,879 INFO    MainThread:9948 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=spawn, using: spawn
+2023-06-26 17:07:11,887 INFO    MainThread:9948 [wandb_init.py:init():606] backend started and connected
+2023-06-26 17:07:11,890 INFO    MainThread:9948 [wandb_init.py:init():703] updated telemetry
+2023-06-26 17:07:11,928 INFO    MainThread:9948 [wandb_init.py:init():736] communicating run to backend with 60.0 second timeout
+2023-06-26 17:07:11,939 INFO    MainThread:9948 [wandb_init.py:init():787] starting run threads in backend
+2023-06-26 17:07:12,058 INFO    MainThread:9948 [wandb_run.py:_console_start():2155] atexit reg
+2023-06-26 17:07:12,059 INFO    MainThread:9948 [wandb_run.py:_redirect():2010] redirect: SettingsConsole.WRAP_RAW
+2023-06-26 17:07:12,059 INFO    MainThread:9948 [wandb_run.py:_redirect():2075] Wrapping output streams.
+2023-06-26 17:07:12,059 INFO    MainThread:9948 [wandb_run.py:_redirect():2100] Redirects installed.
+2023-06-26 17:07:12,060 INFO    MainThread:9948 [wandb_init.py:init():828] run started, returning control to user process
+2023-06-26 17:07:12,062 INFO    MainThread:9948 [wandb_watch.py:watch():51] Watching
+2023-06-26 17:08:29,792 INFO    MainThread:9948 [wandb_run.py:_finish():1890] finishing run projectid/1ebgx1ch
+2023-06-26 17:08:29,792 INFO    MainThread:9948 [wandb_run.py:_atexit_cleanup():2124] got exitcode: 0
+2023-06-26 17:08:29,792 INFO    MainThread:9948 [wandb_run.py:_restore():2107] restore
+2023-06-26 17:08:29,793 INFO    MainThread:9948 [wandb_run.py:_restore():2113] restore done
+2023-06-26 17:08:30,819 INFO    MainThread:9948 [wandb_run.py:_footer_history_summary_info():3467] rendering history
+2023-06-26 17:08:30,820 INFO    MainThread:9948 [wandb_run.py:_footer_history_summary_info():3499] rendering summary

@@ -1,0 +1,1 @@
+- change nelder mead setting to 2 * number parameters (from 10 * number parameters)
