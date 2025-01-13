@@ -1,0 +1,42 @@
+{
+    "os": "Windows-10-10.0.22621-SP0",
+    "python": "3.9.7",
+    "heartbeatAt": "2024-01-05T12:42:16.244625",
+    "startedAt": "2024-01-05T12:42:16.012286",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "d:\\horiz\\IMPORTANT\\0study_graduate\\Pro_COMPASS\\COMPASS_DDM\\LAN\\trainLAN.py",
+    "codePath": "LAN\\trainLAN.py",
+    "git": {
+        "remote": "https://github.com/heeluning/COMPASS_DDM.git",
+        "commit": "0da6b8621e3563d2f0e91b2bcf8855de5da57b33"
+    },
+    "email": "heeluning@163.com",
+    "root": "D:/horiz/IMPORTANT/0study_graduate/Pro_COMPASS/COMPASS_DDM",
+    "host": "HLN_laptop",
+    "username": "horiz",
+    "executable": "C:\\ProgramData\\Anaconda3\\envs\\pyPower\\python.exe",
+    "cpu_count": 12,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2500.0,
+        "min": 0.0,
+        "max": 2500.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2500.0,
+            "min": 0.0,
+            "max": 2500.0
+        }
+    ],
+    "disk": {
+        "total": 274.71483993530273,
+        "used": 100.2370376586914
+    },
+    "memory": {
+        "total": 15.731925964355469
+    }
+}
